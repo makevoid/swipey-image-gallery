@@ -1,0 +1,9 @@
+body {
+  background: #eeeeee; }
+
+img {
+  float: left;
+  width: 50%; }
+
+.clear {
+  clear: both; }

@@ -1,0 +1,12 @@
+!!! 5
+%html
+  - TITLE = "Upandcoming"
+  %head
+    %title= TITLE
+    %link{ rel: "stylesheet", href: "/css/main.css" }
+    = partial :metas
+
+  %body
+    #container
+      %section.content= yield
+    %script{ type: "text/javascript", src: "/js/app.js" }
