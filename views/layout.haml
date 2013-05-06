@@ -7,6 +7,8 @@
     = partial :metas
 
   %body
-    #container
-      %section.content= yield
+    = yield
+    %script{ type: "text/javascript", src: "/js/vendor/underscore.js" }
+    %script{ type: "text/javascript", src: "/js/vendor/jquery.js" }
+    %script{ type: "text/javascript", src: "/js/vendor/jimagesloaded.js" }
     %script{ type: "text/javascript", src: "/js/app.js" }

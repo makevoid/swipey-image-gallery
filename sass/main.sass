@@ -1,8 +1,46 @@
-body
-  background: #EEE
+@import 'vendor/bourbon/bourbon'
 
-img
-  float: left
-  width: 50%
+// mixins
+
+=centered
+  margin: 0 auto
+
+// utils
+
+.right
+  float: right
+
 .clear
   clear: both
+
+// reset
+
+a
+  text-decoration: none
+
+*
+  box-sizing: border-box
+
+body
+  margin: 0
+  padding: 0
+  font-size: 110%
+  height: 100%
+
+p
+  margin: 0 0 1.2em 0
+
+
+// layout
+
+html, body
+  +linear-gradient(#111, #333)
+  height: 100%
+
+
+// main
+
+img
+  width: 100%
+  margin: 0 auto
+  display: block
