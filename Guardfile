@@ -1,5 +1,5 @@
 guard 'sass', input: 'sass', output: 'public/css'
-guard 'coffeescript', input: 'coffee', output: "public/js"
+guard 'coffeescript', input: 'coffee', output: "public/js", bare: true
 
 guard 'livereload' do
   watch(%r{views/.+.(erb|haml|slim|md|markdown)})
@@ -8,4 +8,4 @@ guard 'livereload' do
 end
 
 
-guard :concat, type: "js", files: %w(vendor/underscore vendor/zepto vendor/jimagesloaded app), input_dir: "public/js", output: "public/js/all"
+guard :concat, type: "js", files: %w(vendor/hammer vendor/underscore vendor/zepto vendor/jimagesloaded app), input_dir: "public/js", output: "public/js/all"
