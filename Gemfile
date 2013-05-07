@@ -19,6 +19,7 @@ group :development do
   gem "guard-sass",         require: false
   gem "guard-coffeescript", require: false
   gem "guard-livereload",   require: false
+  gem "guard-concat",       require: false
   # gem "growl"
 end
 

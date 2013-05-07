@@ -2,32 +2,45 @@
   var get_base_image, resize_image;
 
   $("body").imagesLoaded(function() {
-    var image;
+    var image, img;
 
     image = $("img");
     resize_image(image);
-    return $(window).on("resize", function() {
+    $(window).on("resize", function() {
       return resize_image(image);
+    });
+    return img = image.on("touchmove", function(evt) {
+      console.log(evt);
+      return $("body").css("background", "darkBlue");
     });
   });
 
+  $.fn.transform = function(values) {
+    this.css("transform", values);
+    this.css("-ms-transform", values);
+    return this.css("-webkit-transform", values);
+  };
+
+  $.fn.translate = function(left, top) {
+    return this.transform("translate(" + left + "px, " + top + "px)");
+  };
+
   resize_image = function(image) {
-    var base, height, margin, prop, width;
+    var base, height, left, prop, top, width;
 
     base = get_base_image(image);
     prop = base.width / base.height;
     if (prop > 0) {
       width = Math.min(base.width, $(window).width());
-      margin = $(window).height() / 2 - image.height() / 2;
       image.width(width);
-      return image.css({
-        paddingTop: margin
-      });
     } else {
       height = Math.min(base.height, $(window).height());
       width = height * prop;
-      return image.width(width);
+      image.width(width);
     }
+    top = $(window).height() / 2 - image.height() / 2;
+    left = $(window).width() / 2 - image.width() / 2;
+    return image.translate(left, top);
   };
 
   get_base_image = function(current) {

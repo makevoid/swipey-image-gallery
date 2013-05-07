@@ -72,7 +72,8 @@ $.fn.imagesLoaded = function( callback ) {
 		}
 
 		// cache image and its state for future calls
-		$.data( img, 'imagesLoaded', { isBroken: isBroken, src: img.src } );
+		// MKV: commented for zepto compatibility
+		// $.data( img, 'imagesLoaded', { isBroken: isBroken, src: img.src } );
 
 		// trigger deferred progress method if present
 		if ( hasNotify ) {
@@ -96,11 +97,12 @@ $.fn.imagesLoaded = function( callback ) {
 
 			// find out if this image has been already checked for status
 			// if it was, and src has not changed, call imgLoaded on it
-			var cached = $.data( el, 'imagesLoaded' );
-			if ( cached && cached.src === src ) {
-				imgLoaded( el, cached.isBroken );
-				return;
-			}
+			// MKV: commented for zepto compatibility
+			// var cached = $.data( el, 'imagesLoaded' );
+			// if ( cached && cached.src === src ) {
+			// 	imgLoaded( el, cached.isBroken );
+			// 	return;
+			// }
 
 			// if complete is true and browser supports natural sizes, try
 			// to check for image status manually
@@ -122,4 +124,4 @@ $.fn.imagesLoaded = function( callback ) {
 	return deferred ? deferred.promise( $this ) : $this;
 };
 
-})(jQuery);
+})($);
