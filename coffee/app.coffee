@@ -53,7 +53,7 @@ $("body").imagesLoaded ->
 
     bind_gestures: ->
       _(this.images).map (img) ->
-        $(img).off(["swipeleft", "swiperight"])
+        $(img).off(["drag", "dragstart", "dragend", "swipeleft", "swiperight"])
 
       start_x = 0
 
@@ -74,10 +74,13 @@ $("body").imagesLoaded ->
       h_image.on "dragend", (evt) =>
         page_x = evt.gesture.center.pageX
         x = start_x - page_x
+        console.log this.current().data "id"
         if x > 0 # drag_left
           this.next()
-        else     # drag_right
+        else if this.current().data("id") > 0 # drag_right
           this.prev()
+        else
+          this.current().translateX 0
 
       # h_image.on "swipeleft", =>
       #   this.next()

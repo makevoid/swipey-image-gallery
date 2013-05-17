@@ -75,7 +75,7 @@ $("body").imagesLoaded(function() {
         _this = this;
 
       _(this.images).map(function(img) {
-        return $(img).off(["swipeleft", "swiperight"]);
+        return $(img).off(["drag", "dragstart", "dragend", "swipeleft", "swiperight"]);
       });
       start_x = 0;
       h_image = H(this.current().get(0, {
@@ -100,10 +100,13 @@ $("body").imagesLoaded(function() {
 
         page_x = evt.gesture.center.pageX;
         x = start_x - page_x;
+        console.log(_this.current().data("id"));
         if (x > 0) {
           return _this.next();
-        } else {
+        } else if (_this.current().data("id") > 0) {
           return _this.prev();
+        } else {
+          return _this.current().translateX(0);
         }
       });
     };
