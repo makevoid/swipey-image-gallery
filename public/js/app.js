@@ -1,4 +1,4 @@
-var H, get_base_image, resize_image, resize_images;
+var H, debug, get_base_image, resize_image, resize_images;
 
 H = Hammer;
 
@@ -71,13 +71,33 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.bind_gestures = function() {
-      var h_image, handle_drag, handle_drag_thrott, start_x,
+      var h_image, handle_drag, handle_drag_thrott, img, start_x,
         _this = this;
 
       _(this.images).map(function(img) {
         return $(img).off(["drag", "dragstart", "dragend", "swipeleft", "swiperight"]);
       });
       start_x = 0;
+      img = this.current().get(0);
+      img.addEventListener("touchstart", function(evt) {
+        return start_x = evt.gesture.center.pageX;
+      });
+      img.addEventListener("touchend", function(evt) {
+        var page_x, x;
+
+        console.log(_this.current().data("id"));
+        page_x = evt.gesture.center.pageX;
+        x = start_x - page_x;
+        if (x > 0) {
+          return _this.next();
+        } else if (_this.current().data("id") > 0) {
+          return _this.prev();
+        } else {
+          return _this.current().translateX(0);
+        }
+      });
+      console.log(img);
+      return;
       h_image = H(this.current().get(0, {
         swipe_velocity: 0.4,
         drag_block_vertical: true
@@ -190,4 +210,8 @@ get_base_image = function(current) {
   image = new Image();
   image.src = current.attr("src");
   return image;
+};
+
+debug = function(string) {
+  return $(".debug").html(string);
 };

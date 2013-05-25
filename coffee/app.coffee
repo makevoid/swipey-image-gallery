@@ -57,6 +57,41 @@ $("body").imagesLoaded ->
 
       start_x = 0
 
+      img = this.current().get 0
+
+
+
+      img.addEventListener "touchstart", (evt) ->
+        start_x = evt.gesture.center.pageX
+
+      # img.addEventListener "drag", (evt) ->
+      #   console.log "drag", evt
+      #   evt.preventDefault()
+      #
+      # img.addEventListener "dragstart", (evt) ->
+      #   console.log "dragstart", evt
+      #
+      # img.addEventListener "dragend", (evt) ->
+
+      img.addEventListener "touchend", (evt) =>
+        console.log this.current().data "id"
+        # console.log this.current()#.data "id"
+        page_x = evt.gesture.center.pageX
+        x = start_x - page_x
+        if x > 0 # drag_left
+          this.next()
+        else if this.current().data("id") > 0 # drag_right
+          this.prev()
+        else
+          this.current().translateX 0
+
+
+      console.log img
+
+
+
+      return # blocks execution
+
       h_image = H(this.current().get 0, swipe_velocity: 0.4, drag_block_vertical: true)
 
       handle_drag = (evt) ->
@@ -152,3 +187,7 @@ get_base_image = (current) ->
   image = new Image()
   image.src = current.attr "src"
   image
+
+debug = (string) ->
+  $(".debug").html string
+
