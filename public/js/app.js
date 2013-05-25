@@ -1,4 +1,13 @@
-var H, debug, get_base_image, resize_image, resize_images;
+var H, debug, detect_touch_devices, get_base_image, is_touch_device, log, resize_image, resize_images;
+
+is_touch_device = null;
+
+detect_touch_devices = function() {
+  document.querySelector("img").setAttribute('ongesturestart', 'return;');
+  return is_touch_device = !!document.querySelector("img").ongesturestart;
+};
+
+detect_touch_devices();
 
 H = Hammer;
 
@@ -59,8 +68,8 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.prev = function() {
+      this.image_right().translateX(this.positions.left());
       this.current().translateX(this.positions.right());
-      this.image_left().translateX(0);
       this.index -= 1;
       return this.bind_gestures();
     };
@@ -71,79 +80,114 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.bind_gestures = function() {
-      var h_image, handle_drag, handle_drag_thrott, img, start_x,
+      var direction, drag_start, h_image, handle_drag, handle_drag_thrott, img, move, move_end, removeListeners, start_x,
         _this = this;
 
-      _(this.images).map(function(img) {
-        return $(img).off(["drag", "dragstart", "dragend", "swipeleft", "swiperight"]);
-      });
       start_x = 0;
-      img = this.current().get(0);
-      img.addEventListener("touchstart", function(evt) {
+      direction = "right";
+      handle_drag = function(evt) {
+        var x;
+
+        x = evt.gesture ? evt.gesture.deltaX : evt.changedTouches[0].pageX - start_x;
+        return gallery.current().translateX(x);
+      };
+      move = function(evt) {
+        img.className = "fast";
+        handle_drag(evt);
+        return evt.preventDefault();
+      };
+      drag_start = function(evt) {
         return start_x = evt.gesture.center.pageX;
-      });
-      img.addEventListener("touchend", function(evt) {
+      };
+      move_end = function(evt) {
         var page_x, x;
 
-        console.log(_this.current().data("id"));
-        page_x = evt.gesture.center.pageX;
+        img.className = null;
+        log(_this.current().get(0).dataset.id);
+        page_x = _this.get_touch(evt).pageX;
         x = start_x - page_x;
-        if (x > 0) {
-          return _this.next();
+        console.log(_this.current().data("id"));
+        if (x > 0 && _this.current().data("id") >= _this.images.length - 1) {
+          return _this.current().translateX(0);
+        } else if (x > 0) {
+          direction = "right";
+          _this.next();
+          return removeListeners();
         } else if (_this.current().data("id") > 0) {
-          return _this.prev();
+          direction = "left";
+          _this.prev();
+          return removeListeners();
         } else {
           return _this.current().translateX(0);
         }
+      };
+      removeListeners = function() {
+        var h_img;
+
+        img.removeEventListener("touchend", move_end);
+        h_img = H(img);
+        h_img.off("drag", move);
+        h_img.off("dragstart", drag_start);
+        h_img.off("dragend", move_end);
+        img.removeEventListener("touchstart", drag_start);
+        img.removeEventListener("touchmove", move);
+        return img.removeEventListener("touchend", move_end);
+      };
+      img = this.current().get(0);
+      img.addEventListener("touchstart", function(evt) {
+        return start_x = _this.get_touch(evt).pageX;
       });
-      console.log(img);
-      return;
+      img.addEventListener("touchmove", move);
+      img.addEventListener("touchend", move_end);
+      img.addEventListener("webkitTransitionEnd", function() {
+        console.log(direction);
+        return _this.show_images(direction);
+      });
+      if (is_touch_device) {
+        return;
+      }
       h_image = H(this.current().get(0, {
         swipe_velocity: 0.4,
         drag_block_vertical: true
       }));
-      handle_drag = function(evt) {
-        var x;
-
-        x = evt.gesture.deltaX;
-        return gallery.current().translateX(x);
-      };
       handle_drag_thrott = _.throttle(handle_drag, 110);
-      h_image.on("drag", function(evt) {
-        return handle_drag(evt);
-      });
-      h_image.on("dragstart", function(evt) {
-        return start_x = evt.gesture.center.pageX;
-      });
-      return h_image.on("dragend", function(evt) {
-        var page_x, x;
-
-        page_x = evt.gesture.center.pageX;
-        x = start_x - page_x;
-        console.log(_this.current().data("id"));
-        if (x > 0) {
-          return _this.next();
-        } else if (_this.current().data("id") > 0) {
-          return _this.prev();
-        } else {
-          return _this.current().translateX(0);
-        }
-      });
+      h_image.on("drag", move);
+      h_image.on("dragstart", drag_start);
+      return h_image.on("dragend", move_end);
     };
 
-    Gallery.prototype.show_images = function() {
+    Gallery.prototype.show_images = function(direction) {
       this.images.css({
         opacity: 0
       });
       this.current().css({
         opacity: 1
       });
-      this.image_right().css({
-        opacity: 1
-      });
-      return this.image_left().css({
-        opacity: 1
-      });
+      if (direction === "left") {
+        this.image_right().css({
+          opacity: 0
+        });
+        return this.image_left().css({
+          opacity: 1
+        });
+      } else {
+        this.image_right().css({
+          opacity: 1
+        });
+        return this.image_left().css({
+          opacity: 0
+        });
+      }
+    };
+
+    Gallery.prototype.get_touch = function(evt) {
+      if (evt.gesture) {
+        return evt.gesture.center;
+      }
+      if (evt.changedTouches) {
+        return evt.changedTouches[0];
+      }
+      throw "unable to get_touch";
     };
 
     return Gallery;
@@ -214,4 +258,14 @@ get_base_image = function(current) {
 
 debug = function(string) {
   return $(".debug").html(string);
+};
+
+log = function(string) {
+  var existing;
+
+  existing = $(".debug").html();
+  if (existing) {
+    existing = "" + existing + "<br>";
+  }
+  return $(".debug").html("" + existing + string);
 };

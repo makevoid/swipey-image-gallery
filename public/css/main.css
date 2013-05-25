@@ -27,10 +27,10 @@ p {
   margin: 0 0 1.2em 0; }
 
 html, body {
-  background-color: #111111;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #111111), color-stop(100%, #333333));
-  background-image: -webkit-linear-gradient(#111111, #333333);
-  background-image: linear-gradient(#111111, #333333);
+  background-color: white;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(100%, #dddddd));
+  background-image: -webkit-linear-gradient(white, #dddddd);
+  background-image: linear-gradient(white, #dddddd);
   height: 100%; }
 
 .main {
@@ -42,7 +42,13 @@ img {
   width: 100%;
   display: block;
   position: absolute;
-  -webkit-transition: all 0.1s ease-in;
-  -moz-transition: all 0.1s ease-in;
-  transition: all 0.1s ease-in;
-  opacity: 0; }
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  transition: all 0.3s ease-in;
+  opacity: 0;
+  box-shadow: 0 0 10px #999999; }
+
+img.fast {
+  -webkit-transition: all 0;
+  -moz-transition: all 0;
+  transition: all 0; }

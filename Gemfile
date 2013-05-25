@@ -21,6 +21,7 @@ group :development do
   gem "guard-livereload",   require: false
   gem "guard-concat",       require: false
   # gem "growl"
+  gem 'libnotify'
 end
 
 group :test do

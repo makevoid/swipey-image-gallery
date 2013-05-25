@@ -42,7 +42,8 @@ p
 // layout
 
 html, body
-  +linear-gradient(#111, #333)
+  // +linear-gradient(#111, #333)
+  +linear-gradient(#FFF, #DDD)
   height: 100%
 
 
@@ -58,5 +59,10 @@ img
   width: 100%
   display: block
   position: absolute
-  +transition(all 0.1s ease-in)
+  +transition(all 0.3s ease-in)
   opacity: 0
+  // optional, may reduce performance, reduce radius if necessary
+  box-shadow: 0 0 10px #999
+
+img.fast
+  +transition(all 0)
