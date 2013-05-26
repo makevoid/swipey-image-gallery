@@ -11,8 +11,6 @@ detect_touch_devices();
 
 H = Hammer;
 
-$("img").css("transtionDuration", "1s");
-
 $("body").imagesLoaded(function() {
   var Gallery, gallery;
 
@@ -20,6 +18,8 @@ $("body").imagesLoaded(function() {
     function Gallery() {}
 
     Gallery.prototype.images = $("img");
+
+    Gallery.prototype.anim_time = 300;
 
     Gallery.prototype.positions = {
       left: function() {
@@ -44,19 +44,19 @@ $("body").imagesLoaded(function() {
       return $(this.images[this.index - 1]);
     };
 
+    Gallery.prototype.image_left_left = function() {
+      return $(this.images[this.index - 2]);
+    };
+
     Gallery.prototype.resize = function() {
       return resize_image(this.images);
     };
 
     Gallery.prototype.init = function() {
-      var _this = this;
-
+      this.prepare_images();
       this.reposition_images();
       this.bind_gestures();
-      this.show_images();
-      return $("img").on("webkitTransitionEnd", function() {
-        return _this.show_images();
-      });
+      return this.show_images("right");
     };
 
     Gallery.prototype.next = function() {
@@ -77,6 +77,28 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.reposition_images = function() {
       this.images.translateX(this.positions.right());
       return this.current().translateX(0);
+    };
+
+    Gallery.prototype.prepare_images = function() {
+      var img, _i, _len, _ref,
+        _this = this;
+
+      _ref = this.images;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        img = _ref[_i];
+        img.className = "fast";
+      }
+      return setTimeout(function() {
+        var _j, _len1, _ref1, _results;
+
+        _ref1 = _this.images;
+        _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          img = _ref1[_j];
+          _results.push(img.className = null);
+        }
+        return _results;
+      }, 100);
     };
 
     Gallery.prototype.bind_gestures = function() {
@@ -106,43 +128,46 @@ $("body").imagesLoaded(function() {
         log(_this.current().get(0).dataset.id);
         page_x = _this.get_touch(evt).pageX;
         x = start_x - page_x;
-        console.log(_this.current().data("id"));
+        console.log("move end", _this.current().data("id"));
         if (x > 0 && _this.current().data("id") >= _this.images.length - 1) {
-          return _this.current().translateX(0);
+          _this.current().translateX(0);
         } else if (x > 0) {
           direction = "right";
           _this.next();
-          return removeListeners();
         } else if (_this.current().data("id") > 0) {
           direction = "left";
           _this.prev();
-          return removeListeners();
+          removeListeners();
         } else {
-          return _this.current().translateX(0);
+          _this.current().translateX(0);
         }
+        return setTimeout(function() {
+          console.log("asd2");
+          return _this.show_images(direction);
+        }, _this.anim_time);
       };
       removeListeners = function() {
-        var h_img;
+        return _(this.images).map(function(img) {
+          var h_img;
 
-        img.removeEventListener("touchend", move_end);
-        h_img = H(img);
-        h_img.off("drag", move);
-        h_img.off("dragstart", drag_start);
-        h_img.off("dragend", move_end);
-        img.removeEventListener("touchstart", drag_start);
-        img.removeEventListener("touchmove", move);
-        return img.removeEventListener("touchend", move_end);
+          img.removeEventListener("touchend", move_end);
+          h_img = H(img);
+          h_img.off("drag", move);
+          h_img.off("dragstart", drag_start);
+          h_img.off("dragend", move_end);
+          img.removeEventListener("touchstart", drag_start);
+          img.removeEventListener("touchmove", move);
+          return img.removeEventListener("touchend", move_end);
+        });
       };
+      console.log("asd");
       img = this.current().get(0);
+      removeListeners();
       img.addEventListener("touchstart", function(evt) {
         return start_x = _this.get_touch(evt).pageX;
       });
       img.addEventListener("touchmove", move);
       img.addEventListener("touchend", move_end);
-      img.addEventListener("webkitTransitionEnd", function() {
-        console.log(direction);
-        return _this.show_images(direction);
-      });
       if (is_touch_device) {
         return;
       }
@@ -157,6 +182,7 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.show_images = function(direction) {
+      console.log(direction);
       this.images.css({
         opacity: 0
       });
@@ -164,18 +190,18 @@ $("body").imagesLoaded(function() {
         opacity: 1
       });
       if (direction === "left") {
-        this.image_right().css({
-          opacity: 0
+        this.image_left().css({
+          opacity: 1
         });
-        return this.image_left().css({
+        this.image_left_left().css({
+          opacity: 1
+        });
+        return this.image_right().css({
           opacity: 1
         });
       } else {
-        this.image_right().css({
+        return this.image_right().css({
           opacity: 1
-        });
-        return this.image_left().css({
-          opacity: 0
         });
       }
     };

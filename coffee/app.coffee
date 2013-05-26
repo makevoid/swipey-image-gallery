@@ -11,12 +11,13 @@ detect_touch_devices()
 
 H = Hammer
 
-$("img").css "transtionDuration", "1s"
 
 $("body").imagesLoaded ->
 
   class Gallery
     images: $ "img"
+
+    anim_time: 300 # ms
 
     positions:
       left:  -> -$(window).width()
@@ -30,6 +31,8 @@ $("body").imagesLoaded ->
       $ this.images[this.index+1]
     image_left: ->
       $ this.images[this.index-1]
+    image_left_left: ->
+      $ this.images[this.index-2]
 
     resize: ->
       resize_image this.images
@@ -37,13 +40,11 @@ $("body").imagesLoaded ->
       #  resize_image this.images
 
     init: ->
-      # this.resize()
+      this.prepare_images()
       this.reposition_images()
       this.bind_gestures()
-      this.show_images()
+      this.show_images "right"
 
-      $("img").on "webkitTransitionEnd", =>
-        this.show_images()
 
     next: ->
       this.current().translateX this.positions.left()
@@ -62,8 +63,15 @@ $("body").imagesLoaded ->
       this.images.translateX this.positions.right()
       this.current().translateX 0
 
-    bind_gestures: ->
+    prepare_images: ->
+      for img in this.images
+        img.className = "fast"
+      setTimeout =>
+        for img in this.images
+          img.className = null
+      , 100
 
+    bind_gestures: ->
       start_x = 0
       direction = "right"
 
@@ -90,14 +98,13 @@ $("body").imagesLoaded ->
         page_x = this.get_touch(evt).pageX
         x = start_x - page_x
 
-        console.log this.current().data("id")
+        console.log "move end", this.current().data("id")
 
         if x > 0 && this.current().data("id") >= this.images.length-1
           this.current().translateX 0
         else if x > 0
           direction = "right"
           this.next()
-          removeListeners()
         else if this.current().data("id") > 0 # drag_right
           direction = "left"
           this.prev()
@@ -105,27 +112,35 @@ $("body").imagesLoaded ->
         else
           this.current().translateX 0
 
+        setTimeout =>
+          console.log "asd2"
+          this.show_images direction
+        , this.anim_time
+
 
       removeListeners = ->
+        _(this.images).map (img) ->
+          img.removeEventListener "touchend", move_end
+          h_img = H(img)
+          h_img.off "drag", move
+          h_img.off "dragstart", drag_start
+          h_img.off "dragend", move_end
 
-        img.removeEventListener "touchend", move_end
-        h_img = H(img)
-        h_img.off "drag", move
-        h_img.off "dragstart", drag_start
-        h_img.off "dragend", move_end
-
-        img.removeEventListener "touchstart", drag_start
-        img.removeEventListener "touchmove", move
-        img.removeEventListener "touchend", move_end
+          img.removeEventListener "touchstart", drag_start
+          img.removeEventListener "touchmove", move
+          img.removeEventListener "touchend", move_end
 
 
       # _(this.images).map (img) ->
         # $(img).off(["drag", "dragstart", "dragend", "swipeleft", "swiperight"])
         # console.log $(img).get(0)
 
+      console.log("asd")
 
       img = this.current().get 0
 
+
+      removeListeners()
 
       img.addEventListener "touchstart", (evt) =>
         start_x = this.get_touch(evt).pageX
@@ -134,9 +149,8 @@ $("body").imagesLoaded ->
 
       img.addEventListener "touchend", move_end
 
-      img.addEventListener "webkitTransitionEnd", =>
-        console.log direction
-        this.show_images direction
+      # img.addEventListener "webkitTransitionEnd", =>
+      #   console.log "transition end", direction
 
       return if is_touch_device # blocks execution
 
@@ -158,14 +172,15 @@ $("body").imagesLoaded ->
       #   console.log "swipe right"
 
     show_images: (direction) ->
-      this.images.css         opacity: 0
-      this.current().css      opacity: 1
+      console.log direction
+      this.images.css               opacity: 0
+      this.current().css            opacity: 1
       if direction == "left"
-        this.image_right().css  opacity: 0
-        this.image_left().css   opacity: 1
+        this.image_left().css       opacity: 1
+        this.image_left_left().css  opacity: 1
+        this.image_right().css      opacity: 1
       else
-        this.image_right().css  opacity: 1
-        this.image_left().css   opacity: 0
+        this.image_right().css      opacity: 1
 
 
     # private
