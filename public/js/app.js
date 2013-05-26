@@ -1,4 +1,5 @@
-var H, debug, detect_touch_devices, get_base_image, is_touch_device, log, resize_image, resize_images;
+var H, debug, detect_touch_devices, get_base_image, is_touch_device, log, resize_image, resize_images,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 is_touch_device = null;
 
@@ -15,7 +16,11 @@ $("body").imagesLoaded(function() {
   var Gallery, gallery;
 
   Gallery = (function() {
-    function Gallery() {}
+    function Gallery() {
+      this.move_end = __bind(this.move_end, this);
+      this.move_start = __bind(this.move_start, this);
+      this.move = __bind(this.move, this);
+    }
 
     Gallery.prototype.images = $("img");
 
@@ -34,6 +39,10 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.current = function() {
       return $(this.images[this.index]);
+    };
+
+    Gallery.prototype.cur_img = function() {
+      return this.current().get(0);
     };
 
     Gallery.prototype.image_right = function() {
@@ -68,7 +77,7 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.prev = function() {
-      this.image_right().translateX(this.positions.left());
+      this.image_left().translateX(0);
       this.current().translateX(this.positions.right());
       this.index -= 1;
       return this.bind_gestures();
@@ -101,84 +110,82 @@ $("body").imagesLoaded(function() {
       }, 100);
     };
 
-    Gallery.prototype.bind_gestures = function() {
-      var direction, drag_start, h_image, handle_drag, handle_drag_thrott, img, move, move_end, removeListeners, start_x,
+    Gallery.prototype.start_x = null;
+
+    Gallery.prototype.move = function(evt) {
+      this.cur_img().className = "fast";
+      this.handle_drag(evt);
+      return evt.preventDefault();
+    };
+
+    Gallery.prototype.handle_drag = function(evt) {
+      var x;
+
+      x = evt.gesture ? evt.gesture ? evt.gesture.deltaX : void 0 : evt.changedTouches[0].pageX - this.start_x;
+      return this.current().translateX(x);
+    };
+
+    Gallery.prototype.move_start = function(evt) {
+      return this.start_x = this.get_touch(evt).pageX;
+    };
+
+    Gallery.prototype.move_end = function(evt) {
+      var direction, page_x, x,
         _this = this;
+
+      this.cur_img().className = null;
+      log(this.current().get(0).dataset.id);
+      page_x = this.get_touch(evt).pageX;
+      x = this.start_x - page_x;
+      if (x > 0 && this.current().data("id") >= this.images.length - 1) {
+        this.current().translateX(0);
+      } else if (x > 0) {
+        direction = "right";
+        this.next();
+      } else if (this.current().data("id") > 0) {
+        direction = "left";
+        this.prev();
+      } else {
+        this.current().translateX(0);
+      }
+      return setTimeout(function() {
+        return _this.show_images(direction);
+      }, this.anim_time);
+    };
+
+    Gallery.prototype.unbind_gestures = function() {
+      return _(this.images).each(function(img) {
+        var h_img;
+
+        h_img = H(img);
+        h_img.off("drag", this.move);
+        h_img.off("dragstart", this.move_start);
+        h_img.off("dragend", this.move_end);
+        img.removeEventListener("touchstart", this.move_start);
+        img.removeEventListener("touchmove", this.move);
+        return img.removeEventListener("touchend", this.move_end);
+      });
+    };
+
+    Gallery.prototype.bind_gestures = function() {
+      var direction, h_image, start_x;
 
       start_x = 0;
       direction = "right";
-      handle_drag = function(evt) {
-        var x;
-
-        x = evt.gesture ? evt.gesture.deltaX : evt.changedTouches[0].pageX - start_x;
-        return gallery.current().translateX(x);
-      };
-      move = function(evt) {
-        img.className = "fast";
-        handle_drag(evt);
-        return evt.preventDefault();
-      };
-      drag_start = function(evt) {
-        return start_x = evt.gesture.center.pageX;
-      };
-      move_end = function(evt) {
-        var page_x, x;
-
-        img.className = null;
-        log(_this.current().get(0).dataset.id);
-        page_x = _this.get_touch(evt).pageX;
-        x = start_x - page_x;
-        console.log("move end", _this.current().data("id"));
-        if (x > 0 && _this.current().data("id") >= _this.images.length - 1) {
-          _this.current().translateX(0);
-        } else if (x > 0) {
-          direction = "right";
-          _this.next();
-        } else if (_this.current().data("id") > 0) {
-          direction = "left";
-          _this.prev();
-          removeListeners();
-        } else {
-          _this.current().translateX(0);
-        }
-        return setTimeout(function() {
-          console.log("asd2");
-          return _this.show_images(direction);
-        }, _this.anim_time);
-      };
-      removeListeners = function() {
-        return _(this.images).map(function(img) {
-          var h_img;
-
-          img.removeEventListener("touchend", move_end);
-          h_img = H(img);
-          h_img.off("drag", move);
-          h_img.off("dragstart", drag_start);
-          h_img.off("dragend", move_end);
-          img.removeEventListener("touchstart", drag_start);
-          img.removeEventListener("touchmove", move);
-          return img.removeEventListener("touchend", move_end);
-        });
-      };
-      console.log("asd");
-      img = this.current().get(0);
-      removeListeners();
-      img.addEventListener("touchstart", function(evt) {
-        return start_x = _this.get_touch(evt).pageX;
-      });
-      img.addEventListener("touchmove", move);
-      img.addEventListener("touchend", move_end);
+      this.unbind_gestures();
+      this.cur_img().addEventListener("touchstart", this.move_start);
+      this.cur_img().addEventListener("touchmove", this.move);
+      this.cur_img().addEventListener("touchend", this.move_end);
       if (is_touch_device) {
         return;
       }
-      h_image = H(this.current().get(0, {
+      h_image = H(this.cur_img(), {
         swipe_velocity: 0.4,
         drag_block_vertical: true
-      }));
-      handle_drag_thrott = _.throttle(handle_drag, 110);
-      h_image.on("drag", move);
-      h_image.on("dragstart", drag_start);
-      return h_image.on("dragend", move_end);
+      });
+      h_image.on("drag", this.move);
+      h_image.on("dragstart", this.move_start);
+      return h_image.on("dragend", this.move_end);
     };
 
     Gallery.prototype.show_images = function(direction) {
@@ -200,7 +207,10 @@ $("body").imagesLoaded(function() {
           opacity: 1
         });
       } else {
-        return this.image_right().css({
+        this.image_right().css({
+          opacity: 1
+        });
+        return this.image_left().css({
           opacity: 1
         });
       }

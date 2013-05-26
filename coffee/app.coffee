@@ -27,6 +27,8 @@ $("body").imagesLoaded ->
 
     current: ->
       $ this.images[this.index]
+    cur_img: ->
+      this.current().get 0
     image_right: ->
       $ this.images[this.index+1]
     image_left: ->
@@ -45,7 +47,6 @@ $("body").imagesLoaded ->
       this.bind_gestures()
       this.show_images "right"
 
-
     next: ->
       this.current().translateX this.positions.left()
       this.image_right().translateX 0
@@ -54,7 +55,7 @@ $("body").imagesLoaded ->
       this.bind_gestures()
 
     prev: ->
-      this.image_right().translateX this.positions.left()
+      this.image_left().translateX 0
       this.current().translateX this.positions.right()
       this.index -= 1
       this.bind_gestures()
@@ -71,105 +72,81 @@ $("body").imagesLoaded ->
           img.className = null
       , 100
 
+    # ui movements
+
+    start_x: null
+
+    move: (evt) =>
+      this.cur_img().className = "fast"
+      this.handle_drag evt
+      evt.preventDefault()
+
+    handle_drag: (evt) ->
+      x = if evt.gesture
+        evt.gesture.deltaX if evt.gesture
+      else
+        evt.changedTouches[0].pageX - @start_x
+
+      this.current().translateX x
+
+    move_start: (evt) =>
+      @start_x = this.get_touch(evt).pageX
+
+    move_end: (evt) =>
+      this.cur_img().className = null
+      log this.current().get(0).dataset.id
+      page_x = this.get_touch(evt).pageX
+      x = @start_x - page_x
+
+      if x > 0 && this.current().data("id") >= this.images.length-1
+        this.current().translateX 0
+      else if x > 0
+        direction = "right"
+        this.next()
+      else if this.current().data("id") > 0 # drag_right
+        direction = "left"
+        this.prev()
+      else
+        this.current().translateX 0
+
+      setTimeout =>
+        this.show_images direction
+      , this.anim_time
+
+
+    # ui bindings
+
+    unbind_gestures: ->
+      _(this.images).each (img) ->
+        h_img = H(img)
+        h_img.off "drag", this.move
+        h_img.off "dragstart", this.move_start
+        h_img.off "dragend", this.move_end
+        img.removeEventListener "touchstart", this.move_start
+        img.removeEventListener "touchmove", this.move
+        img.removeEventListener "touchend", this.move_end
+
     bind_gestures: ->
       start_x = 0
       direction = "right"
 
-      handle_drag = (evt) ->
-        x = if evt.gesture
-          evt.gesture.deltaX
-        else
-          evt.changedTouches[0].pageX - start_x
 
-        gallery.current().translateX x
-
-
-      move = (evt) =>
-        img.className = "fast"
-        handle_drag evt
-        evt.preventDefault()
-
-      drag_start = (evt) =>
-        start_x = evt.gesture.center.pageX
-
-      move_end = (evt) =>
-        img.className = null
-        log this.current().get(0).dataset.id
-        page_x = this.get_touch(evt).pageX
-        x = start_x - page_x
-
-        console.log "move end", this.current().data("id")
-
-        if x > 0 && this.current().data("id") >= this.images.length-1
-          this.current().translateX 0
-        else if x > 0
-          direction = "right"
-          this.next()
-        else if this.current().data("id") > 0 # drag_right
-          direction = "left"
-          this.prev()
-          removeListeners()
-        else
-          this.current().translateX 0
-
-        setTimeout =>
-          console.log "asd2"
-          this.show_images direction
-        , this.anim_time
-
-
-      removeListeners = ->
-        _(this.images).map (img) ->
-          img.removeEventListener "touchend", move_end
-          h_img = H(img)
-          h_img.off "drag", move
-          h_img.off "dragstart", drag_start
-          h_img.off "dragend", move_end
-
-          img.removeEventListener "touchstart", drag_start
-          img.removeEventListener "touchmove", move
-          img.removeEventListener "touchend", move_end
-
-
-      # _(this.images).map (img) ->
-        # $(img).off(["drag", "dragstart", "dragend", "swipeleft", "swiperight"])
-        # console.log $(img).get(0)
-
-      console.log("asd")
-
-      img = this.current().get 0
-
-
-      removeListeners()
-
-      img.addEventListener "touchstart", (evt) =>
-        start_x = this.get_touch(evt).pageX
-
-      img.addEventListener "touchmove", move
-
-      img.addEventListener "touchend", move_end
+      this.unbind_gestures()
+      this.cur_img().addEventListener "touchstart", this.move_start
+      this.cur_img().addEventListener "touchmove", this.move
+      this.cur_img().addEventListener "touchend", this.move_end
 
       # img.addEventListener "webkitTransitionEnd", =>
       #   console.log "transition end", direction
 
       return if is_touch_device # blocks execution
 
-      h_image = H(this.current().get 0, swipe_velocity: 0.4, drag_block_vertical: true)
+      h_image = H(this.cur_img(), swipe_velocity: 0.4, drag_block_vertical: true)
 
-      handle_drag_thrott = _.throttle(handle_drag, 110)
+      h_image.on "drag", this.move
+      h_image.on "dragstart", this.move_start
+      h_image.on "dragend", this.move_end
 
-      h_image.on "drag", move
-      h_image.on "dragstart", drag_start
-      h_image.on "dragend", move_end
-
-
-      # h_image.on "swipeleft", =>
-      #   this.next()
-      #   console.log "swipe left"
-
-      # h_image.on "swiperight", =>
-      #   this.prev()
-      #   console.log "swipe right"
 
     show_images: (direction) ->
       console.log direction
@@ -181,6 +158,7 @@ $("body").imagesLoaded ->
         this.image_right().css      opacity: 1
       else
         this.image_right().css      opacity: 1
+        this.image_left().css       opacity: 1
 
 
     # private
