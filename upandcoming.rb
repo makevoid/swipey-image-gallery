@@ -29,7 +29,10 @@ class Upandcoming < Sinatra::Base
 
   helpers do
     def photos
-      all = Dir.glob("#{@@path}/public/issues/4/*.jpg")
+      dir = "issues"
+      dir = "issues_linux" if File.exist?("/home/makevoid")
+
+      all = Dir.glob("#{@@path}/public/#{dir}/4/*.jpg")
       all.sort_by do |img|
         File.basename(img).to_i
       end
