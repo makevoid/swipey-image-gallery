@@ -47,7 +47,21 @@ html, body {
   position: relative;
   height: 100%; }
 
-img {
+.thumbs_cont {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  overflow: scroll;
+  width: 100%; }
+
+.thumbs {
+  width: 100%; }
+  .thumbs img {
+    position: relative;
+    z-index: 10;
+    width: 80px; }
+
+.main img {
   width: 100%;
   display: block;
   position: absolute;

@@ -3,7 +3,13 @@
 -# %img{ src: "http://makevoid.com/imgs/makevoid.png" }
 
 .main
-  - photos[0..5].each_with_index do |photo, idx|
+  - photos[0..3].each_with_index do |photo, idx|
     - photo = File.basename photo
     %img{ draggable: "draggable", src: "/issues/4/#{photo}", :"data-id" => idx }
+
+.thumbs_cont
+  .thumbs
+    - photos[0..5].each_with_index do |photo, idx|
+      - photo = File.basename photo
+      %img{ src: "/issues/4/#{photo}", :"data-id" => idx }
 

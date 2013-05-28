@@ -1564,8 +1564,38 @@ detect_touch_devices();
 H = Hammer;
 
 $("body").imagesLoaded(function() {
-  var Gallery, gallery;
+  var Gallery, Thumbs, gallery, thumbs;
 
+  Thumbs = (function() {
+    function Thumbs() {}
+
+    Thumbs.prototype.container = $(".thumbs");
+
+    Thumbs.prototype.images = $(".thumbs img");
+
+    Thumbs.prototype.imagez = function() {
+      return $(".thumbs img").length;
+    };
+
+    Thumbs.prototype.imgs = _(Thumbs.images);
+
+    Thumbs.prototype.init = function() {
+      var img_width, width;
+
+      img_width = 80;
+      this.imgs.each(function(img, idx) {
+        img.style.left = idx * img_width + "px";
+        return img.addEventListener("click", function() {
+          return console.log(this.imgs);
+        });
+      });
+      width = (img_width + 10) * this.imagez().length;
+      return this.container.width(width);
+    };
+
+    return Thumbs;
+
+  })();
   Gallery = (function() {
     function Gallery() {
       this.move_end = __bind(this.move_end, this);
@@ -1573,7 +1603,7 @@ $("body").imagesLoaded(function() {
       this.move = __bind(this.move, this);
     }
 
-    Gallery.prototype.images = $("img");
+    Gallery.prototype.images = $(".main img");
 
     Gallery.prototype.anim_time = 300;
 
@@ -1782,7 +1812,10 @@ $("body").imagesLoaded(function() {
   })();
   gallery = new Gallery();
   window.gallery = gallery;
-  return gallery.init();
+  gallery.init();
+  thumbs = new Thumbs();
+  window.thumbs = thumbs;
+  return thumbs.init();
 });
 
 $.fn.transform = function(values) {

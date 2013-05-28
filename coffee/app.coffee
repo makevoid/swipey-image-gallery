@@ -14,8 +14,58 @@ H = Hammer
 
 $("body").imagesLoaded ->
 
+  # put in talk:
+
+  #   - start different classes for different objects (at cost of duplicating your code) then join them trough relations
+  #   - iterators compared -> java / php / ruby / underscore.js
+
+  # ---- [way to code] -  live coding
+
+  # think of a functionality
+
+  # start from a blank ruby file
+
+  # name methods
+
+  # implement them
+
+  # refactor using classes / etc
+
+
+
+  # ideas to implement
+
+  # live coding is awesome
+
+  # live coding screencasts (peepcode / destroyallsoftware .. etc)
+
+  # imagine if there's  an editor that saves all edits, and replays them, that are only like diffs (like git)
+
+
+  class Thumbs
+    container: $ ".thumbs"
+    images: $ ".thumbs img"
+    imagez: ->
+      $(".thumbs img").length
+    imgs: _(this.images)
+
+    init: ->
+      # console.log "asdasd"
+      img_width = 80
+
+      this.imgs.each (img, idx) ->
+        img.style.left = idx*img_width+"px"
+
+        # bind clicks
+        img.addEventListener "click", ->
+          console.log this.imgs
+
+      width = (img_width+10) * this.imagez().length
+      this.container.width width
+
+
   class Gallery
-    images: $ "img"
+    images: $ ".main img"
 
     anim_time: 300 # ms
 
@@ -174,6 +224,9 @@ $("body").imagesLoaded ->
   window.gallery = gallery
   gallery.init()
 
+  thumbs = new Thumbs()
+  window.thumbs = thumbs
+  thumbs.init()
 
 $.fn.transform = (values) ->
   this.css "transform",         values
