@@ -28,9 +28,9 @@ task :setup => :environment do
 end
 
 task :more_shared_paths => :environment do
-  issues = "#{deploy_to}/current/public/issues_linux"
-  queue! "rm -f #{issues}"
-  queue! "ln -s #{deploy_to}/shared/issues #{issues}"
+  issues = "#{deploy_to}/current/public/issues"
+  queue "rm -f #{issues}"
+  queue "ln -s #{deploy_to}/shared/issues #{issues}"
 end
 
 desc "Deploys the current version to the server."
@@ -42,12 +42,10 @@ task :deploy => :environment do
     invoke :'bundle:install'
 
     to :launch do
+      invoke :'more_shared_paths'
       queue 'mkdir -p tmp'
       queue 'touch tmp/restart.txt'
     end
 
-    to :clean do
-      invoke :'more_shared_paths'
-    end
   end
 end
