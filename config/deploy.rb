@@ -27,6 +27,12 @@ task :setup => :environment do
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/log"]
 end
 
+task :more_shared_paths => :environment do
+  issues = "#{deploy_to}/current/public/issues_linux"
+  queue! "rm -f #{issues}"
+  queue! "ln -s #{deploy_to}/shared/issues #{issues}"
+end
+
 desc "Deploys the current version to the server."
 task :deploy => :environment do
   deploy do
@@ -38,6 +44,10 @@ task :deploy => :environment do
     to :launch do
       queue 'mkdir -p tmp'
       queue 'touch tmp/restart.txt'
+    end
+
+    to :clean do
+      invoke :'more_shared_paths'
     end
   end
 end
