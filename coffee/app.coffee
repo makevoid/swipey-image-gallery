@@ -14,53 +14,25 @@ H = Hammer
 
 $("body").imagesLoaded ->
 
-  # put in talk:
-
-  #   - start different classes for different objects (at cost of duplicating your code) then join them trough relations
-  #   - iterators compared -> java / php / ruby / underscore.js
-
-  # ---- [way to code] -  live coding
-
-  # think of a functionality
-
-  # start from a blank ruby file
-
-  # name methods
-
-  # implement them
-
-  # refactor using classes / etc
-
-
-
-  # ideas to implement
-
-  # live coding is awesome
-
-  # live coding screencasts (peepcode / destroyallsoftware .. etc)
-
-  # imagine if there's  an editor that saves all edits, and replays them, that are only like diffs (like git)
-
 
   class Thumbs
     container: $ ".thumbs"
     images: $ ".thumbs img"
     imagez: ->
-      $(".thumbs img").length
+      $(".thumbs img")
     imgs: _(this.images)
 
     init: ->
-      # console.log "asdasd"
       img_width = 80
 
-      this.imgs.each (img, idx) ->
-        img.style.left = idx*img_width+"px"
+      _(this.imagez()).each (img, idx) ->
+        # img.style.left = idx*img_width+"px"
 
         # bind clicks
-        img.addEventListener "click", ->
-          console.log this.imgs
+        img.addEventListener "click", =>
+          gallery.go_to img.dataset.id
 
-      width = (img_width+10) * this.imagez().length
+      width = (img_width+8) * this.imagez().length
       this.container.width width
 
 
@@ -74,6 +46,26 @@ $("body").imagesLoaded ->
       right: -> $(window).width()
 
     index: 0
+
+    # very public
+
+    go_to: (id) ->
+      # animate
+      return if id == this.index
+      if id > this.index
+        this.animate_forward()
+        this.current().translateX this.image_left()
+      else
+        this.animate_backward()
+        this.current().translateX this.image_right()
+
+      this.cur_img().style.opacity = 0
+      this.index = id
+      this.cur_img().style.opacity = 1
+      this.current().translateX 0
+      this.bind_gestures()
+
+    # ...
 
     current: ->
       $ this.images[this.index]
@@ -97,16 +89,26 @@ $("body").imagesLoaded ->
       this.bind_gestures()
       this.show_images "right"
 
-    next: ->
+
+    # animate
+
+    animate_forward: ->
       this.current().translateX this.positions.left()
       this.image_right().translateX 0
       this.image_left().translateX this.positions.right()
+
+    animate_backward: ->
+      this.image_left().translateX 0
+      this.current().translateX this.positions.right()
+
+
+    next: ->
+      this.animate_forward()
       this.index += 1
       this.bind_gestures()
 
     prev: ->
-      this.image_left().translateX 0
-      this.current().translateX this.positions.right()
+      this.animate_backward()
       this.index -= 1
       this.bind_gestures()
 

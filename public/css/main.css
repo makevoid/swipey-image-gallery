@@ -54,12 +54,10 @@ html, body {
   overflow: scroll;
   width: 100%; }
 
-.thumbs {
-  width: 100%; }
-  .thumbs img {
-    position: relative;
-    z-index: 10;
-    width: 80px; }
+.thumbs img {
+  position: relative;
+  z-index: 10;
+  width: 80px; }
 
 .main img {
   width: 100%;

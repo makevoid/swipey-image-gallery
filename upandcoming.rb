@@ -27,12 +27,17 @@ class Upandcoming < Sinatra::Base
 
   @@path = PATH
 
+
+  @@issues_dir = "issues"
+  @@issues_dir = "issues_linux" if File.exist?("/home/makevoid")
+
+  def issues_dir
+    @@issues_dir
+  end
+
   helpers do
     def photos
-      dir = "issues"
-      dir = "issues_linux" if File.exist?("/home/makevoid")
-
-      all = Dir.glob("#{@@path}/public/#{dir}/4/*.jpg")
+      all = Dir.glob("#{@@path}/public/#{@@issues_dir}/4/*.jpg")
       all.sort_by do |img|
         File.basename(img).to_i
       end

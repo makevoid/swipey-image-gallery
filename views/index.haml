@@ -5,11 +5,11 @@
 .main
   - photos[0..6].each_with_index do |photo, idx|
     - photo = File.basename photo
-    %img{ draggable: "draggable", src: "/issues/4/#{photo}", :"data-id" => idx }
+    %img{ draggable: "draggable", src: "/#{issues_dir}/4/#{photo}", :"data-id" => idx }
 
 .thumbs_cont
   .thumbs
     - photos[0..12].each_with_index do |photo, idx|
       - photo = File.basename photo
-      %img{ src: "/issues/4/thumbs/#{photo}", :"data-id" => idx }
+      %img{ src: "/#{issues_dir}/4/thumbs/#{photo}", :"data-id" => idx }
 

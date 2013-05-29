@@ -1574,7 +1574,7 @@ $("body").imagesLoaded(function() {
     Thumbs.prototype.images = $(".thumbs img");
 
     Thumbs.prototype.imagez = function() {
-      return $(".thumbs img").length;
+      return $(".thumbs img");
     };
 
     Thumbs.prototype.imgs = _(Thumbs.images);
@@ -1583,13 +1583,14 @@ $("body").imagesLoaded(function() {
       var img_width, width;
 
       img_width = 80;
-      this.imgs.each(function(img, idx) {
-        img.style.left = idx * img_width + "px";
+      _(this.imagez()).each(function(img, idx) {
+        var _this = this;
+
         return img.addEventListener("click", function() {
-          return console.log(this.imgs);
+          return gallery.go_to(img.dataset.id);
         });
       });
-      width = (img_width + 10) * this.imagez().length;
+      width = (img_width + 8) * this.imagez().length;
       return this.container.width(width);
     };
 
@@ -1617,6 +1618,24 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.index = 0;
+
+    Gallery.prototype.go_to = function(id) {
+      if (id === this.index) {
+        return;
+      }
+      if (id > this.index) {
+        this.animate_forward();
+        this.current().translateX(this.image_left());
+      } else {
+        this.animate_backward();
+        this.current().translateX(this.image_right());
+      }
+      this.cur_img().style.opacity = 0;
+      this.index = id;
+      this.cur_img().style.opacity = 1;
+      this.current().translateX(0);
+      return this.bind_gestures();
+    };
 
     Gallery.prototype.current = function() {
       return $(this.images[this.index]);
@@ -1649,17 +1668,25 @@ $("body").imagesLoaded(function() {
       return this.show_images("right");
     };
 
-    Gallery.prototype.next = function() {
+    Gallery.prototype.animate_forward = function() {
       this.current().translateX(this.positions.left());
       this.image_right().translateX(0);
-      this.image_left().translateX(this.positions.right());
+      return this.image_left().translateX(this.positions.right());
+    };
+
+    Gallery.prototype.animate_backward = function() {
+      this.image_left().translateX(0);
+      return this.current().translateX(this.positions.right());
+    };
+
+    Gallery.prototype.next = function() {
+      this.animate_forward();
       this.index += 1;
       return this.bind_gestures();
     };
 
     Gallery.prototype.prev = function() {
-      this.image_left().translateX(0);
-      this.current().translateX(this.positions.right());
+      this.animate_backward();
       this.index -= 1;
       return this.bind_gestures();
     };
