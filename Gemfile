@@ -22,6 +22,7 @@ group :development do
   gem "guard-concat",       require: false
   # gem "growl"
   gem 'libnotify'
+  gem "thin"
 end
 
 group :test do
