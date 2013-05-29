@@ -1742,7 +1742,6 @@ $("body").imagesLoaded(function() {
         _this = this;
 
       this.cur_img().className = null;
-      log(this.current().get(0).dataset.id);
       page_x = this.get_touch(evt).pageX;
       x = this.start_x - page_x;
       if (x > 0 && this.current().data("id") >= this.images.length - 1) {
