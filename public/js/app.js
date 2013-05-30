@@ -83,7 +83,7 @@ $("body").imagesLoaded(function() {
       this.index = id;
       this.cur_img().style.opacity = 1;
       this.current().translateX(0);
-      return this.bind_gestures();
+      return this.bind_gestures(this.cur_img());
     };
 
     Gallery.prototype.current = function() {
@@ -223,11 +223,9 @@ $("body").imagesLoaded(function() {
       });
     };
 
-    Gallery.prototype.bind_gestures = function() {
-      var direction, h_image, start_x;
+    Gallery.prototype.bind_gestures = function(img) {
+      var h_image;
 
-      start_x = 0;
-      direction = "right";
       this.unbind_gestures();
       this.cur_img().addEventListener("touchstart", this.move_start);
       this.cur_img().addEventListener("touchmove", this.move);
@@ -245,7 +243,6 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.show_images = function(direction) {
-      console.log(direction);
       this.images.css({
         opacity: 0
       });

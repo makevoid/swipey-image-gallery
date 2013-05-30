@@ -63,7 +63,7 @@ $("body").imagesLoaded ->
       this.index = id
       this.cur_img().style.opacity = 1
       this.current().translateX 0
-      this.bind_gestures()
+      this.bind_gestures this.cur_img()
 
     # ...
 
@@ -178,12 +178,10 @@ $("body").imagesLoaded ->
         img.removeEventListener "touchmove", this.move
         img.removeEventListener "touchend", this.move_end
 
-    bind_gestures: ->
-      start_x = 0
-      direction = "right"
-
-
+    bind_gestures: (img) ->
       this.unbind_gestures()
+
+
       this.cur_img().addEventListener "touchstart", this.move_start
       this.cur_img().addEventListener "touchmove", this.move
       this.cur_img().addEventListener "touchend", this.move_end
@@ -201,7 +199,7 @@ $("body").imagesLoaded ->
 
 
     show_images: (direction) ->
-      console.log direction
+      # TODO: set z indexes - direction == right (asc) direction == left (desc)
       this.images.css               opacity: 0
       this.current().css            opacity: 1
       if direction == "left"
