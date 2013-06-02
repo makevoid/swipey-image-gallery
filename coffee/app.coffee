@@ -66,7 +66,6 @@ $("body").imagesLoaded ->
       this.cur_img().style.opacity = 1
       this.current().translateX 0
       this.bind_gestures()
-      console.log "went to ", id
 
     # ...
 
@@ -107,7 +106,6 @@ $("body").imagesLoaded ->
     zindex_sort: ->
       _(this.images).each (img, idx) ->
         img.style.zIndex = idx+1
-        # console.log
 
     zindex_sort_reverse: ->
       _(this.images).each (img, idx) =>

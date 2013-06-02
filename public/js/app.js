@@ -87,8 +87,7 @@ $("body").imagesLoaded(function() {
       this.index = id;
       this.cur_img().style.opacity = 1;
       this.current().translateX(0);
-      this.bind_gestures();
-      return console.log("went to ", id);
+      return this.bind_gestures();
     };
 
     Gallery.prototype.current = function() {
