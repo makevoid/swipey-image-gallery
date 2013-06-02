@@ -173,19 +173,21 @@ $("body").imagesLoaded ->
       page_x = this.get_touch(evt).pageX
       x = @start_x - page_x
       x_delta = Math.abs x
-      x_delta_min = 30
+      x_delta_min = 50
+      id = this.current().data("id")
 
-      if this.current().data("id") >= this.images.length-1
+      console.log id
+      if id <= 0 && x < 0 || id >= this.images.length-1  && x > 0
         this.current().translateX 0
-
+        return
       else if x > 0 && x_delta > x_delta_min
         direction = "right"
         this.next()
-      else if this.current().data("id") > 0 && x_delta > x_delta_min # drag_right
+      else if id > 0 && x_delta > x_delta_min # drag_right
         direction = "left"
         this.prev()
       else
-        throw "move_end error"
+        throw "move_end should not reach here"
 
       setTimeout =>
         this.show_images direction
@@ -206,7 +208,6 @@ $("body").imagesLoaded ->
 
     bind_gestures: ->
       this.unbind_gestures()
-
 
       this.cur_img().addEventListener "touchstart", this.move_start
       this.cur_img().addEventListener "touchmove", this.move
