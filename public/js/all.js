@@ -1566,6 +1566,9 @@ H = Hammer;
 $("body").imagesLoaded(function() {
   var Gallery, Thumbs, gallery, thumbs;
 
+  $('img').on('dragstart', function(evt) {
+    return evt.preventDefault();
+  });
   Thumbs = (function() {
     function Thumbs() {}
 
@@ -1587,7 +1590,7 @@ $("body").imagesLoaded(function() {
         var _this = this;
 
         return img.addEventListener("click", function() {
-          return gallery.go_to(img.dataset.id);
+          return gallery.go_to(parseInt(img.dataset.id));
         });
       });
       width = (img_width + 8) * this.imagez().length;
@@ -1602,6 +1605,7 @@ $("body").imagesLoaded(function() {
       this.move_end = __bind(this.move_end, this);
       this.move_start = __bind(this.move_start, this);
       this.move = __bind(this.move, this);
+      this.images_show = __bind(this.images_show, this);
     }
 
     Gallery.prototype.images = $(".main img");
@@ -1634,7 +1638,8 @@ $("body").imagesLoaded(function() {
       this.index = id;
       this.cur_img().style.opacity = 1;
       this.current().translateX(0);
-      return this.bind_gestures(this.cur_img());
+      this.bind_gestures();
+      return console.log("went to ", id);
     };
 
     Gallery.prototype.current = function() {
@@ -1665,16 +1670,47 @@ $("body").imagesLoaded(function() {
       this.prepare_images();
       this.reposition_images();
       this.bind_gestures();
-      return this.show_images("right");
+      this.show_images("right");
+      this.images_hide();
+      return setTimeout(this.images_show, 400);
+    };
+
+    Gallery.prototype.images_hide = function() {
+      return _(this.images).each(function(img, idx) {
+        return img.style.opacity = 0;
+      });
+    };
+
+    Gallery.prototype.images_show = function() {
+      return _(this.images).each(function(img, idx) {
+        return img.style.opacity = 1;
+      });
+    };
+
+    Gallery.prototype.zindex_sort = function() {
+      return _(this.images).each(function(img, idx) {
+        return img.style.zIndex = idx + 1;
+      });
+    };
+
+    Gallery.prototype.zindex_sort_reverse = function() {
+      var _this = this;
+
+      return _(this.images).each(function(img, idx) {
+        return img.style.zIndex = _this.images.length - idx;
+      });
     };
 
     Gallery.prototype.animate_forward = function() {
+      this.zindex_sort();
+      this.images.translateX(this.positions.right());
       this.current().translateX(this.positions.left());
-      this.image_right().translateX(0);
-      return this.image_left().translateX(this.positions.right());
+      return this.image_right().translateX(0);
     };
 
     Gallery.prototype.animate_backward = function() {
+      this.zindex_sort_reverse();
+      this.images.translateX(this.positions.left());
       this.image_left().translateX(0);
       return this.current().translateX(this.positions.right());
     };
@@ -1738,22 +1774,24 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.move_end = function(evt) {
-      var direction, page_x, x,
+      var direction, page_x, x, x_delta, x_delta_min,
         _this = this;
 
       this.cur_img().className = null;
       page_x = this.get_touch(evt).pageX;
       x = this.start_x - page_x;
-      if (x > 0 && this.current().data("id") >= this.images.length - 1) {
+      x_delta = Math.abs(x);
+      x_delta_min = 30;
+      if (this.current().data("id") >= this.images.length - 1) {
         this.current().translateX(0);
-      } else if (x > 0) {
+      } else if (x > 0 && x_delta > x_delta_min) {
         direction = "right";
         this.next();
-      } else if (this.current().data("id") > 0) {
+      } else if (this.current().data("id") > 0 && x_delta > x_delta_min) {
         direction = "left";
         this.prev();
       } else {
-        this.current().translateX(0);
+        throw "move_end error";
       }
       return setTimeout(function() {
         return _this.show_images(direction);
@@ -1774,7 +1812,7 @@ $("body").imagesLoaded(function() {
       });
     };
 
-    Gallery.prototype.bind_gestures = function(img) {
+    Gallery.prototype.bind_gestures = function() {
       var h_image;
 
       this.unbind_gestures();
@@ -1794,7 +1832,7 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.show_images = function(direction) {
-      this.images.css({
+      $(this.images).css({
         opacity: 0
       });
       this.current().css({
@@ -1826,6 +1864,9 @@ $("body").imagesLoaded(function() {
       }
       if (evt.changedTouches) {
         return evt.changedTouches[0];
+      }
+      if (evt.pageX) {
+        return evt;
       }
       throw "unable to get_touch";
     };

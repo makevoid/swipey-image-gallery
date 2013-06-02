@@ -14,6 +14,8 @@ H = Hammer
 
 $("body").imagesLoaded ->
 
+  $('img').on 'dragstart', (evt) ->
+    evt.preventDefault()
 
   class Thumbs
     container: $ ".thumbs"
@@ -30,7 +32,7 @@ $("body").imagesLoaded ->
 
         # bind clicks
         img.addEventListener "click", =>
-          gallery.go_to img.dataset.id
+          gallery.go_to parseInt img.dataset.id
 
       width = (img_width+8) * this.imagez().length
       this.container.width width
@@ -63,7 +65,8 @@ $("body").imagesLoaded ->
       this.index = id
       this.cur_img().style.opacity = 1
       this.current().translateX 0
-      this.bind_gestures this.cur_img()
+      this.bind_gestures()
+      console.log "went to ", id
 
     # ...
 
@@ -88,19 +91,41 @@ $("body").imagesLoaded ->
       this.reposition_images()
       this.bind_gestures()
       this.show_images "right"
+      this.images_hide()
+      setTimeout this.images_show, 400
 
+    # zIndex order
+
+    images_hide: ->
+      _(this.images).each (img, idx) ->
+        img.style.opacity = 0
+
+    images_show: =>
+      _(this.images).each (img, idx) ->
+        img.style.opacity = 1
+
+    zindex_sort: ->
+      _(this.images).each (img, idx) ->
+        img.style.zIndex = idx+1
+        # console.log
+
+    zindex_sort_reverse: ->
+      _(this.images).each (img, idx) =>
+        img.style.zIndex = this.images.length-idx
 
     # animate
 
     animate_forward: ->
+      this.zindex_sort()
+      this.images.translateX this.positions.right()
       this.current().translateX this.positions.left()
       this.image_right().translateX 0
-      this.image_left().translateX this.positions.right()
 
     animate_backward: ->
+      this.zindex_sort_reverse()
+      this.images.translateX this.positions.left()
       this.image_left().translateX 0
       this.current().translateX this.positions.right()
-
 
     next: ->
       this.animate_forward()
@@ -149,17 +174,20 @@ $("body").imagesLoaded ->
       # log this.current().get(0).dataset.id
       page_x = this.get_touch(evt).pageX
       x = @start_x - page_x
+      x_delta = Math.abs x
+      x_delta_min = 30
 
-      if x > 0 && this.current().data("id") >= this.images.length-1
+      if this.current().data("id") >= this.images.length-1
         this.current().translateX 0
-      else if x > 0
+
+      else if x > 0 && x_delta > x_delta_min
         direction = "right"
         this.next()
-      else if this.current().data("id") > 0 # drag_right
+      else if this.current().data("id") > 0 && x_delta > x_delta_min # drag_right
         direction = "left"
         this.prev()
       else
-        this.current().translateX 0
+        throw "move_end error"
 
       setTimeout =>
         this.show_images direction
@@ -178,7 +206,7 @@ $("body").imagesLoaded ->
         img.removeEventListener "touchmove", this.move
         img.removeEventListener "touchend", this.move_end
 
-    bind_gestures: (img) ->
+    bind_gestures: ->
       this.unbind_gestures()
 
 
@@ -200,7 +228,7 @@ $("body").imagesLoaded ->
 
     show_images: (direction) ->
       # TODO: set z indexes - direction == right (asc) direction == left (desc)
-      this.images.css               opacity: 0
+      $(this.images).css            opacity: 0
       this.current().css            opacity: 1
       if direction == "left"
         this.image_left().css       opacity: 1
@@ -214,8 +242,9 @@ $("body").imagesLoaded ->
     # private
 
     get_touch: (evt) ->
-      return evt.gesture.center if evt.gesture
-      return evt.changedTouches[0]     if evt.changedTouches
+      return evt.gesture.center     if evt.gesture
+      return evt.changedTouches[0]  if evt.changedTouches
+      return evt                    if evt.pageX
       throw "unable to get_touch"
 
   # main
