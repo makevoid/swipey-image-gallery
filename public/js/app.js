@@ -76,6 +76,9 @@ $("body").imagesLoaded(function() {
       if (id === this.index) {
         return;
       }
+      if (id >= this.images.length) {
+        throw "error can't go_to a not loaded image";
+      }
       if (id > this.index) {
         this.animate_forward();
         this.current().translateX(this.image_left());

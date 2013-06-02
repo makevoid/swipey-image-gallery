@@ -54,6 +54,7 @@ $("body").imagesLoaded ->
     go_to: (id) ->
       # animate
       return if id == this.index
+      throw "error can't go_to a not loaded image" if id >= this.images.length
       if id > this.index
         this.animate_forward()
         this.current().translateX this.image_left()
