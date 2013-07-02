@@ -16,21 +16,18 @@ $("body").imagesLoaded ->
 
   $('img').on 'dragstart', (evt) ->
     evt.preventDefault()
-
+    
   class Thumbs
     container: $ ".thumbs"
     images: $ ".thumbs img"
     imagez: ->
-      $(".thumbs img")
-    imgs: _(this.images)
+      $ ".thumbs img"
+    imgs: _ this.images
 
     init: ->
       img_width = 80
 
       _(this.imagez()).each (img, idx) ->
-        # img.style.left = idx*img_width+"px"
-
-        # bind clicks
         img.addEventListener "click", =>
           gallery.go_to parseInt img.dataset.id
 
@@ -54,7 +51,11 @@ $("body").imagesLoaded ->
     go_to: (id) ->
       # animate
       return if id == this.index
-      throw "error can't go_to a not loaded image" if id >= this.images.length
+      
+      if id >= this.images.length
+        this.load_image id
+        # throw "error can't go_to a not loaded image" 
+      
       if id > this.index
         this.animate_forward()
         this.current().translateX this.image_left()
@@ -67,7 +68,7 @@ $("body").imagesLoaded ->
       this.cur_img().style.opacity = 1
       this.current().translateX 0
       this.bind_gestures()
-
+      
     # ...
 
     current: ->
@@ -80,21 +81,46 @@ $("body").imagesLoaded ->
       $ this.images[this.index-1]
     image_left_left: ->
       $ this.images[this.index-2]
-
-    resize: ->
-      resize_image this.images
-      #$(window).on "resize", =>
-      #  resize_image this.images
+      
+    slides: []
 
     init: ->
-      this.prepare_images()
+      $.getJSON "/slides.json", (slides) =>
+        this.slides = slides
+      
+        # this.load_image 3
+        
+        this.initialize()
+
+          
+    initialize: ->
+      this.prepare_for_animation()
       this.reposition_images()
       this.bind_gestures()
       this.show_images "right"
       this.images_hide()
-      setTimeout this.images_show, 400
-
-    # zIndex order
+      window.onresize = this.win_resize_images
+      setTimeout this.images_show, 400 # FIXME
+      
+    append_image: (url) ->  
+      img = new Image()
+      img.src = url
+      $(img).translateX this.positions.right()
+      gallery = document.querySelector ".main"
+      gallery.appendChild img
+      this.images.push img
+      
+    load_image: (idx) ->
+      url = "/issues/4/#{this.slides[idx]}.jpg"
+      this.append_image(url)  
+      
+      
+        
+    win_resize_images: =>
+      this.images.each (idx, img) ->
+        $(img).width = $(window).width()
+      this.images.translateX this.positions.right()
+      this.current().translateX 0
 
     images_hide: ->
       _(this.images).each (img, idx) ->
@@ -127,25 +153,30 @@ $("body").imagesLoaded ->
       this.current().translateX this.positions.right()
 
     next: ->
-      this.animate_forward()
-      this.index += 1
-      this.bind_gestures()
+      # this.images.translateX this.positions.right()
+      this.prepare_for_animation =>
+        this.animate_forward()
+        this.index += 1
+        this.bind_gestures()
 
     prev: ->
-      this.animate_backward()
-      this.index -= 1
-      this.bind_gestures()
+      # this.images.translateX this.positions.left()
+      this.prepare_for_animation =>
+        this.animate_backward()
+        this.index -= 1
+        this.bind_gestures()
 
     reposition_images: ->
       this.images.translateX this.positions.right()
       this.current().translateX 0
 
-    prepare_images: ->
+    prepare_for_animation: (callback) ->
       for img in this.images
         img.className = "fast"
       setTimeout =>
         for img in this.images
           img.className = null
+        callback() if callback
       , 100
 
     # ui movements
@@ -160,8 +191,10 @@ $("body").imagesLoaded ->
     handle_drag: (evt) ->
       x = if evt.gesture
         evt.gesture.deltaX if evt.gesture
-      else
+      else if evt.changedTouches
         evt.changedTouches[0].pageX - @start_x
+      else
+        evt.pageX
 
       this.current().translateX x
 
@@ -174,20 +207,24 @@ $("body").imagesLoaded ->
       page_x = this.get_touch(evt).pageX
       x = @start_x - page_x
       x_delta = Math.abs x
-      x_delta_min = 50
+      x_delta_min = 30
       id = this.current().data("id")
 
-      console.log id
-      if id <= 0 && x < 0 || id >= this.images.length-1  && x > 0
+      not_enough_movement = x_delta < x_delta_min 
+      moving_left_at_start = id <= 0 && x < 0
+      moving_right_at_end = id >= this.images.length-1  && x > 0
+      
+      if not_enough_movement || moving_left_at_start || moving_right_at_end
         this.current().translateX 0
         return
-      else if x > 0 && x_delta > x_delta_min
+      else if x > 0 # moving right
         direction = "right"
         this.next()
-      else if id > 0 && x_delta > x_delta_min # drag_right
+      else if id > 0 # drag_right
         direction = "left"
         this.prev()
-      else
+      else  
+        console.log id, x_delta
         throw "move_end should not reach here"
 
       setTimeout =>
@@ -217,10 +254,9 @@ $("body").imagesLoaded ->
       # img.addEventListener "webkitTransitionEnd", =>
       #   console.log "transition end", direction
 
-      return if is_touch_device # blocks execution
-
+      # return if is_touch_device # blocks execution
+      
       h_image = H(this.cur_img(), swipe_velocity: 0.4, drag_block_vertical: true)
-
       h_image.on "drag", this.move
       h_image.on "dragstart", this.move_start
       h_image.on "dragend", this.move_end

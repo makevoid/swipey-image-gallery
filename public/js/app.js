@@ -55,6 +55,7 @@ $("body").imagesLoaded(function() {
       this.move_start = __bind(this.move_start, this);
       this.move = __bind(this.move, this);
       this.images_show = __bind(this.images_show, this);
+      this.win_resize_images = __bind(this.win_resize_images, this);
     }
 
     Gallery.prototype.images = $(".main img");
@@ -77,7 +78,7 @@ $("body").imagesLoaded(function() {
         return;
       }
       if (id >= this.images.length) {
-        throw "error can't go_to a not loaded image";
+        this.load_image(id);
       }
       if (id > this.index) {
         this.animate_forward();
@@ -113,17 +114,51 @@ $("body").imagesLoaded(function() {
       return $(this.images[this.index - 2]);
     };
 
-    Gallery.prototype.resize = function() {
-      return resize_image(this.images);
-    };
+    Gallery.prototype.slides = [];
 
     Gallery.prototype.init = function() {
-      this.prepare_images();
+      var _this = this;
+
+      return $.getJSON("/slides.json", function(slides) {
+        _this.slides = slides;
+        return _this.initialize();
+      });
+    };
+
+    Gallery.prototype.initialize = function() {
+      this.prepare_for_animation();
       this.reposition_images();
       this.bind_gestures();
       this.show_images("right");
       this.images_hide();
+      window.onresize = this.win_resize_images;
       return setTimeout(this.images_show, 400);
+    };
+
+    Gallery.prototype.append_image = function(url) {
+      var gallery, img;
+
+      img = new Image();
+      img.src = url;
+      $(img).translateX(this.positions.right());
+      gallery = document.querySelector(".main");
+      gallery.appendChild(img);
+      return this.images.push(img);
+    };
+
+    Gallery.prototype.load_image = function(idx) {
+      var url;
+
+      url = "/issues/4/" + this.slides[idx] + ".jpg";
+      return this.append_image(url);
+    };
+
+    Gallery.prototype.win_resize_images = function() {
+      this.images.each(function(idx, img) {
+        return $(img).width = $(window).width();
+      });
+      this.images.translateX(this.positions.right());
+      return this.current().translateX(0);
     };
 
     Gallery.prototype.images_hide = function() {
@@ -167,15 +202,23 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.next = function() {
-      this.animate_forward();
-      this.index += 1;
-      return this.bind_gestures();
+      var _this = this;
+
+      return this.prepare_for_animation(function() {
+        _this.animate_forward();
+        _this.index += 1;
+        return _this.bind_gestures();
+      });
     };
 
     Gallery.prototype.prev = function() {
-      this.animate_backward();
-      this.index -= 1;
-      return this.bind_gestures();
+      var _this = this;
+
+      return this.prepare_for_animation(function() {
+        _this.animate_backward();
+        _this.index -= 1;
+        return _this.bind_gestures();
+      });
     };
 
     Gallery.prototype.reposition_images = function() {
@@ -183,7 +226,7 @@ $("body").imagesLoaded(function() {
       return this.current().translateX(0);
     };
 
-    Gallery.prototype.prepare_images = function() {
+    Gallery.prototype.prepare_for_animation = function(callback) {
       var img, _i, _len, _ref,
         _this = this;
 
@@ -193,15 +236,16 @@ $("body").imagesLoaded(function() {
         img.className = "fast";
       }
       return setTimeout(function() {
-        var _j, _len1, _ref1, _results;
+        var _j, _len1, _ref1;
 
         _ref1 = _this.images;
-        _results = [];
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           img = _ref1[_j];
-          _results.push(img.className = null);
+          img.className = null;
         }
-        return _results;
+        if (callback) {
+          return callback();
+        }
       }, 100);
     };
 
@@ -216,7 +260,7 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.handle_drag = function(evt) {
       var x;
 
-      x = evt.gesture ? evt.gesture ? evt.gesture.deltaX : void 0 : evt.changedTouches[0].pageX - this.start_x;
+      x = evt.gesture ? evt.gesture ? evt.gesture.deltaX : void 0 : evt.changedTouches ? evt.changedTouches[0].pageX - this.start_x : evt.pageX;
       return this.current().translateX(x);
     };
 
@@ -225,26 +269,29 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.move_end = function(evt) {
-      var direction, id, page_x, x, x_delta, x_delta_min,
+      var direction, id, moving_left_at_start, moving_right_at_end, not_enough_movement, page_x, x, x_delta, x_delta_min,
         _this = this;
 
       this.cur_img().className = null;
       page_x = this.get_touch(evt).pageX;
       x = this.start_x - page_x;
       x_delta = Math.abs(x);
-      x_delta_min = 50;
+      x_delta_min = 30;
       id = this.current().data("id");
-      console.log(id);
-      if (id <= 0 && x < 0 || id >= this.images.length - 1 && x > 0) {
+      not_enough_movement = x_delta < x_delta_min;
+      moving_left_at_start = id <= 0 && x < 0;
+      moving_right_at_end = id >= this.images.length - 1 && x > 0;
+      if (not_enough_movement || moving_left_at_start || moving_right_at_end) {
         this.current().translateX(0);
         return;
-      } else if (x > 0 && x_delta > x_delta_min) {
+      } else if (x > 0) {
         direction = "right";
         this.next();
-      } else if (id > 0 && x_delta > x_delta_min) {
+      } else if (id > 0) {
         direction = "left";
         this.prev();
       } else {
+        console.log(id, x_delta);
         throw "move_end should not reach here";
       }
       return setTimeout(function() {
@@ -273,9 +320,6 @@ $("body").imagesLoaded(function() {
       this.cur_img().addEventListener("touchstart", this.move_start);
       this.cur_img().addEventListener("touchmove", this.move);
       this.cur_img().addEventListener("touchend", this.move_end);
-      if (is_touch_device) {
-        return;
-      }
       h_image = H(this.cur_img(), {
         swipe_velocity: 0.4,
         drag_block_vertical: true

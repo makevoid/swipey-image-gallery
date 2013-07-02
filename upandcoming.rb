@@ -4,14 +4,7 @@ require "#{path}/config/env.rb"
 
 class Upandcoming < Sinatra::Base
   include Voidtools::Sinatra::ViewHelpers
-
-  # basic logging configs:
-  #
-  # set :logging, true
-  # log = File.new "log/development.log", "a"
-  # STDOUT.reopen log
-  # STDERR.reopen log
-
+  
   # partial :comment, { comment: "blah" }
   # partial :comment, comment
 
@@ -26,7 +19,6 @@ class Upandcoming < Sinatra::Base
   end
 
   @@path = PATH
-
 
   @@issues_dir = "issues"
   @@issues_dir = "issues_linux" if File.exist?("/home/makevoid")
@@ -46,6 +38,13 @@ class Upandcoming < Sinatra::Base
 
   get "/" do
     haml :index
+  end
+  
+  get "/slides.json" do
+    # TODO: staticize this
+    photos.map do |photo|
+      File.basename photo, ".jpg"
+    end.to_json
   end
 
 end
