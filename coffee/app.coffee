@@ -2,18 +2,28 @@
 
 is_touch_device = null
 
+is_ffos = navigator.userAgent.match(/Mozilla\/\d+\.\d+ \(Mobile/)
+
 detect_touch_devices = ->
   document.querySelector("img").setAttribute('ongesturestart', 'return;')
   is_touch_device =
     !!document.querySelector("img").ongesturestart
 
+
+add_devices_css = ->
+  document.body.classList.add "ffos" if is_ffos
+
+
 detect_touch_devices()
+
 
 H = Hammer
 
 
 $("body").imagesLoaded ->
-
+  
+  add_devices_css()
+    
   $('img').on 'dragstart', (evt) ->
     evt.preventDefault()
     
@@ -55,12 +65,18 @@ $("body").imagesLoaded ->
         this.load_image id
         # throw "error can't go_to a not loaded image" 
       
+      # TODO: rewrite
       if id > this.index
         this.animate_forward()
+        this.current().translateX this.image_left()
       else
         this.animate_backward()
+        this.current().translateX this.image_right()
 
+      this.cur_img().style.opacity = 0
       this.index = id
+      this.cur_img().style.opacity = 1
+      this.current().translateX 0
       this.bind_gestures()
       
     # ...
@@ -253,6 +269,11 @@ $("body").imagesLoaded ->
       #   console.log "transition end", direction
 
       # return if is_touch_device # blocks execution
+      
+      
+      # log(navigator.userAgent)
+      return if is_ffos
+      # don't use drag events as FFOS utilizes them both
       
       h_image = H(this.cur_img(), swipe_velocity: 0.4, drag_block_vertical: true)
       h_image.on "drag", this.move

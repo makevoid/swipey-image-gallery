@@ -75,6 +75,9 @@ html, body {
   opacity: 0;
   box-shadow: 0 0 10px #999999; }
 
+.ffos .main img {
+  box-shadow: none; }
+
 img.fast {
   -webkit-transition: all 0;
   -moz-transition: all 0;

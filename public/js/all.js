@@ -1549,14 +1549,22 @@ $.fn.imagesLoaded = function( callback ) {
 };
 
 })($);
-var H, debug, detect_touch_devices, get_base_image, is_touch_device, log, resize_image, resize_images,
+var H, add_devices_css, debug, detect_touch_devices, get_base_image, is_ffos, is_touch_device, log, resize_image, resize_images,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 is_touch_device = null;
 
+is_ffos = navigator.userAgent.match(/Mozilla\/\d+\.\d+ \(Mobile/);
+
 detect_touch_devices = function() {
   document.querySelector("img").setAttribute('ongesturestart', 'return;');
   return is_touch_device = !!document.querySelector("img").ongesturestart;
+};
+
+add_devices_css = function() {
+  if (is_ffos) {
+    return document.body.classList.add("ffos");
+  }
 };
 
 detect_touch_devices();
@@ -1566,6 +1574,7 @@ H = Hammer;
 $("body").imagesLoaded(function() {
   var Gallery, Thumbs, gallery, thumbs;
 
+  add_devices_css();
   $('img').on('dragstart', function(evt) {
     return evt.preventDefault();
   });
@@ -1633,10 +1642,15 @@ $("body").imagesLoaded(function() {
       }
       if (id > this.index) {
         this.animate_forward();
+        this.current().translateX(this.image_left());
       } else {
         this.animate_backward();
+        this.current().translateX(this.image_right());
       }
+      this.cur_img().style.opacity = 0;
       this.index = id;
+      this.cur_img().style.opacity = 1;
+      this.current().translateX(0);
       return this.bind_gestures();
     };
 
@@ -1874,6 +1888,9 @@ $("body").imagesLoaded(function() {
       this.cur_img().addEventListener("touchstart", this.move_start);
       this.cur_img().addEventListener("touchmove", this.move);
       this.cur_img().addEventListener("touchend", this.move_end);
+      if (is_ffos) {
+        return;
+      }
       h_image = H(this.cur_img(), {
         swipe_velocity: 0.4,
         drag_block_vertical: true
