@@ -82,15 +82,10 @@ $("body").imagesLoaded(function() {
       }
       if (id > this.index) {
         this.animate_forward();
-        this.current().translateX(this.image_left());
       } else {
         this.animate_backward();
-        this.current().translateX(this.image_right());
       }
-      this.cur_img().style.opacity = 0;
       this.index = id;
-      this.cur_img().style.opacity = 1;
-      this.current().translateX(0);
       return this.bind_gestures();
     };
 
@@ -187,16 +182,22 @@ $("body").imagesLoaded(function() {
       });
     };
 
+    Gallery.prototype.images_next = function() {
+      return this.images.slice(this.index + 1);
+    };
+
+    Gallery.prototype.images_prev = function() {
+      return this.images.slice(0, +(this.index - 1) + 1 || 9e9);
+    };
+
     Gallery.prototype.animate_forward = function() {
       this.zindex_sort();
-      this.images.translateX(this.positions.right());
       this.current().translateX(this.positions.left());
       return this.image_right().translateX(0);
     };
 
     Gallery.prototype.animate_backward = function() {
       this.zindex_sort_reverse();
-      this.images.translateX(this.positions.left());
       this.image_left().translateX(0);
       return this.current().translateX(this.positions.right());
     };
@@ -204,6 +205,7 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.next = function() {
       var _this = this;
 
+      this.images_next().translateX(this.positions.right());
       return this.prepare_for_animation(function() {
         _this.animate_forward();
         _this.index += 1;
@@ -214,6 +216,7 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.prev = function() {
       var _this = this;
 
+      this.images_prev().translateX(this.positions.left());
       return this.prepare_for_animation(function() {
         _this.animate_backward();
         _this.index -= 1;

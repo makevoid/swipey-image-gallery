@@ -58,15 +58,15 @@ $("body").imagesLoaded ->
       
       if id > this.index
         this.animate_forward()
-        this.current().translateX this.image_left()
+        # this.current().translateX this.image_left()
       else
         this.animate_backward()
-        this.current().translateX this.image_right()
+        # this.current().translateX this.image_right()
 
-      this.cur_img().style.opacity = 0
+      # this.cur_img().style.opacity = 0
       this.index = id
-      this.cur_img().style.opacity = 1
-      this.current().translateX 0
+      # this.cur_img().style.opacity = 1
+      # this.current().translateX 0
       this.bind_gestures()
       
     # ...
@@ -129,7 +129,7 @@ $("body").imagesLoaded ->
     images_show: =>
       _(this.images).each (img, idx) ->
         img.style.opacity = 1
-
+    
     zindex_sort: ->
       _(this.images).each (img, idx) ->
         img.style.zIndex = idx+1
@@ -138,29 +138,35 @@ $("body").imagesLoaded ->
       _(this.images).each (img, idx) =>
         img.style.zIndex = this.images.length-idx
 
+    images_next: ->
+      this.images[(this.index+1)..-1]
+      
+    images_prev: ->
+      this.images[0..(this.index-1)]
+
     # animate
 
     animate_forward: ->
       this.zindex_sort()
-      this.images.translateX this.positions.right()
+      # this.images.translateX this.positions.right()
       this.current().translateX this.positions.left()
       this.image_right().translateX 0
 
     animate_backward: ->
       this.zindex_sort_reverse()
-      this.images.translateX this.positions.left()
+      # this.images.translateX this.positions.left()
       this.image_left().translateX 0
       this.current().translateX this.positions.right()
 
     next: ->
-      # this.images.translateX this.positions.right()
+      this.images_next().translateX this.positions.right()
       this.prepare_for_animation =>
         this.animate_forward()
         this.index += 1
         this.bind_gestures()
 
     prev: ->
-      # this.images.translateX this.positions.left()
+      this.images_prev().translateX this.positions.left()
       this.prepare_for_animation =>
         this.animate_backward()
         this.index -= 1
