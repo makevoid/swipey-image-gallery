@@ -49,7 +49,6 @@ $("body").imagesLoaded ->
     # very public
 
     go_to: (id) ->
-      # animate
       return if id == this.index
       
       if id >= this.images.length
@@ -58,15 +57,10 @@ $("body").imagesLoaded ->
       
       if id > this.index
         this.animate_forward()
-        # this.current().translateX this.image_left()
       else
         this.animate_backward()
-        # this.current().translateX this.image_right()
 
-      # this.cur_img().style.opacity = 0
       this.index = id
-      # this.cur_img().style.opacity = 1
-      # this.current().translateX 0
       this.bind_gestures()
       
     # ...
@@ -148,13 +142,11 @@ $("body").imagesLoaded ->
 
     animate_forward: ->
       this.zindex_sort()
-      # this.images.translateX this.positions.right()
       this.current().translateX this.positions.left()
       this.image_right().translateX 0
 
     animate_backward: ->
       this.zindex_sort_reverse()
-      # this.images.translateX this.positions.left()
       this.image_left().translateX 0
       this.current().translateX this.positions.right()
 
