@@ -75,6 +75,9 @@ html, body {
   opacity: 0;
   box-shadow: 0 0 10px #999999; }
 
+.main img:first-child {
+  opacity: 1; }
+
 .ffos .main img {
   box-shadow: none; }
 
