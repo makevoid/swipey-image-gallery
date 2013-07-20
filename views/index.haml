@@ -2,16 +2,16 @@
 
 -# %img{ src: "http://makevoid.com/imgs/makevoid.png" }
 
-- idx = -1
+- idx = 1
 
 .main
-  - photos[0..6].each_with_index do |photo, idx|
+  - photos[0..idx].each_with_index do |photo, idx|
     - photo = File.basename photo
     %img{ draggable: "draggable", src: "/#{issues_dir}/4/#{photo}", :"data-id" => idx }
 
 .thumbs_cont
   .thumbs
-    - photos[0..idx].each_with_index do |photo, idx|
+    - photos[0..-1].each_with_index do |photo, idx|
       - photo = File.basename photo
       %img{ src: "/#{issues_dir}/4/thumbs/#{photo}", :"data-id" => idx }
 

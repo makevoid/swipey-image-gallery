@@ -61,23 +61,42 @@ $("body").imagesLoaded ->
     go_to: (id) ->
       return if id == this.index
       
-      if id >= this.images.length
-        this.load_image id
-        # throw "error can't go_to a not loaded image" 
+      # unload images
+      
+      $(".main img").remove()
+      
+      
+      this.load_image id-1
+      this.load_image id
+      this.load_image id+1
+        
+      
+      # TODO: load images
       
       # TODO: rewrite
-      if id > this.index
-        this.animate_forward()
-        this.current().translateX this.image_left()
-      else
-        this.animate_backward()
-        this.current().translateX this.image_right()
-
-      this.cur_img().style.opacity = 0
+      
+      # if id > this.index
+      #   this.animate_forward()
+      #   this.current().translateX this.image_left()
+      # else
+      #   this.animate_backward()
+      #   this.current().translateX this.image_right()
+      # 
+      # this.cur_img().style.opacity = 0
+      # this.index = id
+      # this.cur_img().style.opacity = 1
+      # this.current().translateX 0
+      # this.bind_gestures()
+      
+      
+      this.prepare_for_animation()
       this.index = id
-      this.cur_img().style.opacity = 1
+      this.images.translateX this.positions.right()
       this.current().translateX 0
+      this.images.css(opacity: 0)
+      this.cur_img().style.opacity = 1
       this.bind_gestures()
+
       
     # ...
 
@@ -111,20 +130,17 @@ $("body").imagesLoaded ->
       this.images_hide()
       window.onresize = this.win_resize_images
       setTimeout this.images_show, 400 # FIXME
+      window.addEventListener "keydown", this.handle_keyboard.bind(this)
       
-    append_image: (url) ->  
+    load_image: (idx) ->
+      url = "/issues/4/#{this.slides[idx]}.jpg"
       img = new Image()
       img.src = url
+      img.dataset.id = idx
       $(img).translateX this.positions.right()
       gallery = document.querySelector ".main"
       gallery.appendChild img
       this.images.push img
-      
-    load_image: (idx) ->
-      url = "/issues/4/#{this.slides[idx]}.jpg"
-      this.append_image(url)  
-      
-      
         
     win_resize_images: =>
       this.images.each (idx, img) ->
@@ -153,7 +169,26 @@ $("body").imagesLoaded ->
       
     images_prev: ->
       this.images[0..(this.index-1)]
+      
+     
+    # dioboia!  
+    #
+    # images_current: ->
+    #   first = 0
+    #   last = this.slides.length-1
+    #   first = this.index-1 unless this.index < 0
+    #   last = this.index+1 unless this.index >= last
+    #   this.images[first..last]
 
+    # unload_images: ->
+    #   return # remove it 
+    #   console.log "unload! idx:", this.index
+    #   console.log _(this.images).map( (img) -> img.dataset.id )
+    #   return if this.index <= 0
+    #   $(".main img[data-id='#{this.index-1}']").remove()
+    #   console.log $(".main img").length
+      
+      
     # animate
 
     animate_forward: ->
@@ -167,6 +202,15 @@ $("body").imagesLoaded ->
       this.current().translateX this.positions.right()
 
     next: ->
+      return if this.index >= this.slides.length-1  
+      
+      setTimeout =>
+        this.show_images "right"
+      , this.anim_time
+
+      if this.index <= this.slides.length-3
+        this.load_image this.index+2  
+      
       this.images_next().translateX this.positions.right()
       this.prepare_for_animation =>
         this.animate_forward()
@@ -174,6 +218,12 @@ $("body").imagesLoaded ->
         this.bind_gestures()
 
     prev: ->
+      return if this.index <= 0
+      
+      setTimeout =>
+        this.show_images "left"
+      , this.anim_time
+      
       this.images_prev().translateX this.positions.left()
       this.prepare_for_animation =>
         this.animate_backward()
@@ -226,24 +276,18 @@ $("body").imagesLoaded ->
 
       not_enough_movement = x_delta < x_delta_min 
       moving_left_at_start = id <= 0 && x < 0
-      moving_right_at_end = id >= this.images.length-1  && x > 0
+      moving_right_at_end = id >= this.slides.length-1  && x > 0
       
       if not_enough_movement || moving_left_at_start || moving_right_at_end
         this.current().translateX 0
         return
       else if x > 0 # moving right
-        direction = "right"
         this.next()
       else if id > 0 # drag_right
-        direction = "left"
         this.prev()
       else  
         console.log id, x_delta
         throw "move_end should not reach here"
-
-      setTimeout =>
-        this.show_images direction
-      , this.anim_time
 
 
     # ui bindings
@@ -264,11 +308,12 @@ $("body").imagesLoaded ->
       this.cur_img().addEventListener "touchstart", this.move_start
       this.cur_img().addEventListener "touchmove", this.move
       this.cur_img().addEventListener "touchend", this.move_end
-
+      
       # img.addEventListener "webkitTransitionEnd", =>
       #   console.log "transition end", direction
 
       # return if is_touch_device # blocks execution
+      
       
       
       # log(navigator.userAgent)
@@ -279,10 +324,21 @@ $("body").imagesLoaded ->
       h_image.on "drag", this.move
       h_image.on "dragstart", this.move_start
       h_image.on "dragend", this.move_end
+      
+    handle_keyboard: (evt) ->
+
+      this.prev() if evt.keyCode == 37
+      this.next() if evt.keyCode == 39
+      
+      
+      # setTimeout =>
+      #   this.show_images direction
+      # , this.anim_time
+      
+      
 
 
     show_images: (direction) ->
-      # TODO: set z indexes - direction == right (asc) direction == left (desc)
       $(this.images).css            opacity: 0
       this.current().css            opacity: 1
       if direction == "left"
@@ -325,37 +381,21 @@ $.fn.translateX = (left) ->
   # image.css left: left, top: top # fallback
   this.transform "translateX(#{left}px)"
 
-resize_image = (image) ->
-  base = get_base_image image
-  prop = base.width / base.height
-
-  if prop > 0 # horizontal
-    width = Math.min base.width, $(window).width()
-    image.width width
-  else # vertical
-    height = Math.min base.height, $(window).height()
-    width = height * prop
-    image.width width
-
-  top   = $(window).height()/2 - image.height()/2
-  left  = $(window).width()/2 - image.width()/2
-  image.translate left, top
-
-resize_images = (images) ->
-  base = get_base_image $(images[0])
-  prop = base.width / base.height
-
-  if prop > 0 # horizontal
-    width = Math.min base.width, $(window).width()
-    images.width width
-  else # vertical
-    height = Math.min base.height, $(window).height()
-    width = height * prop
-    images.width width
-
-  top   = $(window).height()/2 - images.height()/2
-  left  = $(window).width()/2 - images.width()/2
-  images.translate left, top
+# resize_images = (images) ->
+#   base = get_base_image $(images[0])
+#   prop = base.width / base.height
+# 
+#   if prop > 0 # horizontal
+#     width = Math.min base.width, $(window).width()
+#     images.width width
+#   else # vertical
+#     height = Math.min base.height, $(window).height()
+#     width = height * prop
+#     images.width width
+# 
+#   top   = $(window).height()/2 - images.height()/2
+#   left  = $(window).width()/2 - images.width()/2
+#   images.translate left, top
 
 get_base_image = (current) ->
   image = new Image()

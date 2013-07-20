@@ -1,4 +1,4 @@
-var H, add_devices_css, debug, detect_touch_devices, get_base_image, is_ffos, is_touch_device, log, resize_image, resize_images,
+var H, add_devices_css, debug, detect_touch_devices, get_base_image, is_ffos, is_touch_device, log,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 is_touch_device = null;
@@ -86,20 +86,18 @@ $("body").imagesLoaded(function() {
       if (id === this.index) {
         return;
       }
-      if (id >= this.images.length) {
-        this.load_image(id);
-      }
-      if (id > this.index) {
-        this.animate_forward();
-        this.current().translateX(this.image_left());
-      } else {
-        this.animate_backward();
-        this.current().translateX(this.image_right());
-      }
-      this.cur_img().style.opacity = 0;
+      $(".main img").remove();
+      this.load_image(id - 1);
+      this.load_image(id);
+      this.load_image(id + 1);
+      this.prepare_for_animation();
       this.index = id;
-      this.cur_img().style.opacity = 1;
+      this.images.translateX(this.positions.right());
       this.current().translateX(0);
+      this.images.css({
+        opacity: 0
+      });
+      this.cur_img().style.opacity = 1;
       return this.bind_gestures();
     };
 
@@ -141,25 +139,21 @@ $("body").imagesLoaded(function() {
       this.show_images("right");
       this.images_hide();
       window.onresize = this.win_resize_images;
-      return setTimeout(this.images_show, 400);
+      setTimeout(this.images_show, 400);
+      return window.addEventListener("keydown", this.handle_keyboard.bind(this));
     };
 
-    Gallery.prototype.append_image = function(url) {
-      var gallery, img;
+    Gallery.prototype.load_image = function(idx) {
+      var gallery, img, url;
 
+      url = "/issues/4/" + this.slides[idx] + ".jpg";
       img = new Image();
       img.src = url;
+      img.dataset.id = idx;
       $(img).translateX(this.positions.right());
       gallery = document.querySelector(".main");
       gallery.appendChild(img);
       return this.images.push(img);
-    };
-
-    Gallery.prototype.load_image = function(idx) {
-      var url;
-
-      url = "/issues/4/" + this.slides[idx] + ".jpg";
-      return this.append_image(url);
     };
 
     Gallery.prototype.win_resize_images = function() {
@@ -219,6 +213,15 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.next = function() {
       var _this = this;
 
+      if (this.index >= this.slides.length - 1) {
+        return;
+      }
+      setTimeout(function() {
+        return _this.show_images("right");
+      }, this.anim_time);
+      if (this.index <= this.slides.length - 3) {
+        this.load_image(this.index + 2);
+      }
       this.images_next().translateX(this.positions.right());
       return this.prepare_for_animation(function() {
         _this.animate_forward();
@@ -230,6 +233,12 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.prev = function() {
       var _this = this;
 
+      if (this.index <= 0) {
+        return;
+      }
+      setTimeout(function() {
+        return _this.show_images("left");
+      }, this.anim_time);
       this.images_prev().translateX(this.positions.left());
       return this.prepare_for_animation(function() {
         _this.animate_backward();
@@ -286,8 +295,7 @@ $("body").imagesLoaded(function() {
     };
 
     Gallery.prototype.move_end = function(evt) {
-      var direction, id, moving_left_at_start, moving_right_at_end, not_enough_movement, page_x, x, x_delta, x_delta_min,
-        _this = this;
+      var id, moving_left_at_start, moving_right_at_end, not_enough_movement, page_x, x, x_delta, x_delta_min;
 
       this.cur_img().className = null;
       page_x = this.get_touch(evt).pageX;
@@ -297,23 +305,17 @@ $("body").imagesLoaded(function() {
       id = this.current().data("id");
       not_enough_movement = x_delta < x_delta_min;
       moving_left_at_start = id <= 0 && x < 0;
-      moving_right_at_end = id >= this.images.length - 1 && x > 0;
+      moving_right_at_end = id >= this.slides.length - 1 && x > 0;
       if (not_enough_movement || moving_left_at_start || moving_right_at_end) {
         this.current().translateX(0);
-        return;
       } else if (x > 0) {
-        direction = "right";
-        this.next();
+        return this.next();
       } else if (id > 0) {
-        direction = "left";
-        this.prev();
+        return this.prev();
       } else {
         console.log(id, x_delta);
         throw "move_end should not reach here";
       }
-      return setTimeout(function() {
-        return _this.show_images(direction);
-      }, this.anim_time);
     };
 
     Gallery.prototype.unbind_gestures = function() {
@@ -347,6 +349,15 @@ $("body").imagesLoaded(function() {
       h_image.on("drag", this.move);
       h_image.on("dragstart", this.move_start);
       return h_image.on("dragend", this.move_end);
+    };
+
+    Gallery.prototype.handle_keyboard = function(evt) {
+      if (evt.keyCode === 37) {
+        this.prev();
+      }
+      if (evt.keyCode === 39) {
+        return this.next();
+      }
     };
 
     Gallery.prototype.show_images = function(direction) {
@@ -412,42 +423,6 @@ $.fn.translate = function(left, top) {
 
 $.fn.translateX = function(left) {
   return this.transform("translateX(" + left + "px)");
-};
-
-resize_image = function(image) {
-  var base, height, left, prop, top, width;
-
-  base = get_base_image(image);
-  prop = base.width / base.height;
-  if (prop > 0) {
-    width = Math.min(base.width, $(window).width());
-    image.width(width);
-  } else {
-    height = Math.min(base.height, $(window).height());
-    width = height * prop;
-    image.width(width);
-  }
-  top = $(window).height() / 2 - image.height() / 2;
-  left = $(window).width() / 2 - image.width() / 2;
-  return image.translate(left, top);
-};
-
-resize_images = function(images) {
-  var base, height, left, prop, top, width;
-
-  base = get_base_image($(images[0]));
-  prop = base.width / base.height;
-  if (prop > 0) {
-    width = Math.min(base.width, $(window).width());
-    images.width(width);
-  } else {
-    height = Math.min(base.height, $(window).height());
-    width = height * prop;
-    images.width(width);
-  }
-  top = $(window).height() / 2 - images.height() / 2;
-  left = $(window).width() / 2 - images.width() / 2;
-  return images.translate(left, top);
 };
 
 get_base_image = function(current) {
