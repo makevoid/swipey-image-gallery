@@ -5,7 +5,7 @@
 - idx = 1
 
 .main
-  - photos[0..idx].each_with_index do |photo, idx|
+  - photos[0..0].each_with_index do |photo, idx|
     - photo = File.basename photo
     %img{ draggable: "draggable", src: "/#{issues_dir}/#{ISSUE_NUM}/#{photo}", :"data-id" => idx }
 

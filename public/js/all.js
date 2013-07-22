@@ -1549,7 +1549,7 @@ $.fn.imagesLoaded = function( callback ) {
 };
 
 })($);
-var Gallery, Image, PATH, SIZE, Window, gallery, log;
+var Gallery, Image, PATH, SIZE, Window, gallery, log, thumbs;
 
 PATH = "issues/05";
 
@@ -1581,6 +1581,10 @@ Gallery = (function() {
     }
   };
 
+  Gallery.prototype.handle_thumbs_click = function() {
+    return console.log("asd");
+  };
+
   Gallery.prototype.next = function() {
     return this.go_to(this.idx + 1);
   };
@@ -1592,6 +1596,15 @@ Gallery = (function() {
   Gallery.prototype.go_to = function(idx) {
     var direction;
 
+    if (this.idx === idx) {
+      return;
+    }
+    if (idx < 0) {
+      return;
+    }
+    if (idx > SIZE) {
+      return;
+    }
     log("switch to ", idx);
     direction = "forward";
     if (this.nearby(idx)) {
@@ -1615,7 +1628,9 @@ Gallery = (function() {
 Window = (function() {
   function Window() {}
 
-  Window.prototype.push_image = function() {};
+  Window.prototype.push_image = function() {
+    return log("push");
+  };
 
   Window.prototype.remove_image = function() {};
 
@@ -1640,3 +1655,7 @@ Image = (function() {
 gallery = new Gallery;
 
 window.addEventListener("keydown", gallery.handle_keyboard.bind(gallery));
+
+thumbs = document.querySelector(".thumbs");
+
+thumbs.addEventListener("click", gallery.handle_thumbs_click.bind(gallery));

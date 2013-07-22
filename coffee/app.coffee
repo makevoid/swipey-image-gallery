@@ -24,7 +24,10 @@ class Gallery
   handle_keyboard: (evt) ->
     this.prev() if evt.keyCode == 37
     this.next() if evt.keyCode == 39
-
+    
+  handle_thumbs_click: ->
+    console.log "asd"
+    
   next: ->
     this.go_to @idx+1
 
@@ -32,6 +35,9 @@ class Gallery
     this.go_to @idx-1
 
   go_to: (idx) ->
+    return if @idx == idx
+    return if idx < 0
+    return if idx > SIZE
     log "switch to ", idx
     # sanitize idx
 
@@ -52,6 +58,15 @@ class Gallery
 
 class Window
   push_image: ->
+    log "push"
+    # gallery = document.querySelector ".main"
+    # log gallery
+    # frag = document.createDocumentFragment()
+    # img = document.createElement "img"
+    # img.src = "/issues/5/02.jpg"
+    # img.dataset.id = 1
+    # gallery.appendChild img
+    
 
   remove_image: ->
 
@@ -73,4 +88,7 @@ class Image
 gallery = new Gallery
 
 window.addEventListener "keydown", gallery.handle_keyboard.bind gallery
+
+thumbs = document.querySelector ".thumbs"
+thumbs.addEventListener "click", gallery.handle_thumbs_click.bind gallery
 #
