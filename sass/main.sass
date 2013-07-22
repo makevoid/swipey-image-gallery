@@ -86,10 +86,16 @@ html, body
   width: 100%
   display: block
   position: absolute
-  +transition(all 0.3s ease-in)
   opacity: 0
   // optional, may reduce performance, reduce radius if necessary
   box-shadow: 0 0 10px #999
+
+  // +transition(-webkit-transform 0.4s ease-in-out)
+  -webkit-transition: all 0.4s ease-in-out
+  // -webkit-transform: "translate3d(200%, 0, 0)"
+
+// .main img .back
+// .main img .back
 
 .main img:first-child
   opacity: 1

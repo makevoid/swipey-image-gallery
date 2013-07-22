@@ -69,11 +69,9 @@ html, body {
   width: 100%;
   display: block;
   position: absolute;
-  -webkit-transition: all 0.3s ease-in;
-  -moz-transition: all 0.3s ease-in;
-  transition: all 0.3s ease-in;
   opacity: 0;
-  box-shadow: 0 0 10px #999999; }
+  box-shadow: 0 0 10px #999999;
+  -webkit-transition: all 0.4s ease-in-out; }
 
 .main img:first-child {
   opacity: 1; }

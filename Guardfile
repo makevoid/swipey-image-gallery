@@ -8,8 +8,10 @@ guard 'livereload' do
 end
 
 
-js_files = %w(vendor/hammer vendor/underscore vendor/zepto vendor/jimagesloaded)
+# js_files = %w(vendor/hammer vendor/underscore vendor/zepto vendor/jimagesloaded)
 # js_files << "old"
+
+js_files = %w(bind_shim vendor/domready)
 js_files << "app"
 
 guard :concat, type: "js", files: js_files, input_dir: "public/js", output: "public/js/all"
