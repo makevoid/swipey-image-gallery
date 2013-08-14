@@ -1,6 +1,6 @@
 var Gallery, Image, PATH, SIZE, Window, defer, llog;
 
-PATH = "issues_linux/5";
+PATH = "issues/5";
 
 SIZE = 11 - 1;
 

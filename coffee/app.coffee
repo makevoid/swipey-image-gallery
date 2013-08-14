@@ -1,7 +1,7 @@
 # confs
 
-# PATH = "issues/5"
-PATH = "issues_linux/5"
+PATH = "issues/5"
+#PATH = "issues_linux/5"
 SIZE = 11 -1 # as it's zero based
 
 # utils
