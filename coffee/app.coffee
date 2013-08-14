@@ -43,8 +43,9 @@ class Gallery
     this.prev() if evt.keyCode == 37
     this.next() if evt.keyCode == 39
 
-  handle_thumbs_click: ->
-    console.log "asd"
+  handle_thumbs_click: (evt) ->
+    id = evt.target.dataset.id
+    this.go_to parseInt(id)
 
   # actions
 
@@ -58,7 +59,7 @@ class Gallery
     return if @idx == idx
     return if idx < 0
     return if idx > SIZE
-    console.log "switch to ", idx+1
+    console.log "switch to", idx+1
     # sanitize idx
 
     direction = "forward"
@@ -77,51 +78,94 @@ class Gallery
     idx == @idx-1 || idx == @idx+1
 
 class Window
+  images_dir: "issues/5"
+  # images_dir: "issues_linux/5"
+  
   constructor: (@gallery) ->
+
+  # replace
+  
+  replace_window: (idx) ->
+    img = document.querySelector ".main img"
+    img.remove()
+
+    console.log "removed"
+    
+    img = document.createElement "img"
+    img.draggable = true
+    img.dataset.id = idx
+    img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
+    
+    this.gallery_elem().appendChild img
+    img.style.opacity = 1
+    
+    img.style.webkitTransform = "translate3d(0, 0, 0)"
+
+  # push_and_slide
 
   push_and_slide: (idx) ->
     this.push_image idx
-    this.slide idx
-    this.remove_image()
 
   push_image: (idx) ->
-    console.log "push"
-
-    gallery = document.querySelector ".main"
+    direction = this.direction idx
+    
     img = document.createElement "img"
     img.draggable = true
-
     img.dataset.id = idx
-    img.src = "/issues_linux/5/#{this.pad idx+1}.jpg"
-    gallery.appendChild img
-    # or prepend
-
-
-    # place on the right
-    img.style.opacity = 1
-    img.style.webkitTransform = "translate3d(100%, 0, 0)"
-
-    console.log gallery
-
-
-  slide: (idx) ->
-
-    defer ->
-      img = document.querySelector ".main img[data-id='#{idx-1}']"
+    img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
+      
+    if direction == "next"
+      this.gallery_elem().appendChild img
+      img.style.opacity = 1
+      # place on the right
+      img.style.webkitTransform = "translate3d(100%, 0, 0)"
+    else
+      this.gallery_elem().insertBefore img
+      img.style.opacity = 1
+      # place on the left
       img.style.webkitTransform = "translate3d(-100%, 0, 0)"
+    
+    this.slide direction, idx
 
+  deferred_slide: (idx, percent) ->
     defer ->
       img = document.querySelector ".main img[data-id='#{idx}']"
-      img.style.webkitTransform = "translate3d(0, 0, 0)"
+      img.style.webkitTransform = "translate3d(#{percent}%, 0, 0)"
 
-  remove_image: ->
+  slide: (direction, idx) ->
+    
+    if direction == "next"
+      this.deferred_slide idx-1, -100
+    else
+      this.deferred_slide idx+1, 100
+        
+    this.deferred_slide idx, 0
 
+    this.remove_image direction
 
-  #
+  remove_image: (direction) ->
+    idx = @gallery.idx
 
-  replace_window: (idx) ->
+    # after slide event, instead of timeout
+    setTimeout =>
+      id = if direction == "next"
+        idx
+      else
+        idx
+        
+      img = document.querySelector ".main img[data-id='#{id}']"  
+      img.remove()
+      console.log "removed", idx
+      
+    , 700
 
   # private
+
+  gallery_elem: ->
+    document.querySelector ".main"
+
+  direction: (idx) ->
+    if idx > @gallery.idx then "next" else "prev"
 
   pad: (num) ->
     s = "0" + num
@@ -139,11 +183,13 @@ class Image
 domready ->
 
   gallery = new Gallery()
+  window.gallery = gallery
 
   window.addEventListener "keydown", gallery.handle_keyboard.bind gallery
 
-  thumbs = document.querySelector ".thumbs"
-  thumbs.addEventListener "click", gallery.handle_thumbs_click.bind gallery
+  thumbs = document.querySelectorAll ".thumbs img"
+  for thumb in thumbs
+    thumb.addEventListener "click", gallery.handle_thumbs_click.bind gallery
 
 
 
