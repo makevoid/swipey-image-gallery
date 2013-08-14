@@ -1,7 +1,7 @@
 # confs
 
 PATH = "issues/05"
-SIZE = 11
+SIZE = 11 -1 # as it's zero based
 
 # utils
 
@@ -16,7 +16,7 @@ class Gallery
   constructor:  ->
     @idx = 0 # current index
     @images = []
-    @window = new Window()
+    @window = new Window(this)
     # console.log "gallery! #{PATH}, #{SIZE}"
     # console.log "images: ", @images
     this.fill_window()
@@ -58,17 +58,15 @@ class Gallery
     return if @idx == idx
     return if idx < 0
     return if idx > SIZE
-    console.log "switch to ", idx
+    console.log "switch to ", idx+1
     # sanitize idx
 
     direction = "forward"
 
     if this.nearby(idx)
-      @window.push_image()
-      @window.slide()
-      @window.remove_image()
+      @window.push_and_slide(idx)
     else
-      @window.replace_window()
+      @window.replace_window(idx)
 
     # async? (called inside window)
     @idx = idx
@@ -79,15 +77,25 @@ class Gallery
     idx == @idx-1 || idx == @idx+1
 
 class Window
-  push_image: ->
+  constructor: (@gallery) ->
+
+  push_and_slide: (idx) ->
+    this.push_image idx
+    this.slide idx
+    this.remove_image()
+
+  push_image: (idx) ->
     console.log "push"
 
     gallery = document.querySelector ".main"
     img = document.createElement "img"
-    img.dataset.id = 1
     img.draggable = true
-    img.src = "/issues_linux/5/02.jpg"
+
+    img.dataset.id = idx
+    img.src = "/issues_linux/5/#{this.pad idx+1}.jpg"
     gallery.appendChild img
+    # or prepend
+
 
     # place on the right
     img.style.opacity = 1
@@ -96,14 +104,14 @@ class Window
     console.log gallery
 
 
-  slide: ->
+  slide: (idx) ->
 
     defer ->
-      img = document.querySelector ".main img[data-id='0']"
+      img = document.querySelector ".main img[data-id='#{idx-1}']"
       img.style.webkitTransform = "translate3d(-100%, 0, 0)"
 
     defer ->
-      img = document.querySelector ".main img[data-id='1']"
+      img = document.querySelector ".main img[data-id='#{idx}']"
       img.style.webkitTransform = "translate3d(0, 0, 0)"
 
   remove_image: ->
@@ -111,7 +119,13 @@ class Window
 
   #
 
-  replace_window: ->
+  replace_window: (idx) ->
+
+  # private
+
+  pad: (num) ->
+    s = "0" + num
+    s.substr s.length-2
 
 
 class Image

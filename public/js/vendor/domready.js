@@ -1,7 +1,5 @@
 // https://github.com/ded/domready
 
-console.log("asd");
-
 !function (name, definition) {
   if (typeof module != 'undefined') module.exports = definition()
   else if (typeof define == 'function' && typeof define.amd == 'object') define(definition)

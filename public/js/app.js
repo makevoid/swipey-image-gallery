@@ -2,7 +2,7 @@ var Gallery, Image, PATH, SIZE, Window, defer, llog;
 
 PATH = "issues/05";
 
-SIZE = 11;
+SIZE = 11 - 1;
 
 llog = function(log) {
   var debug;
@@ -19,7 +19,7 @@ Gallery = (function() {
   function Gallery() {
     this.idx = 0;
     this.images = [];
-    this.window = new Window();
+    this.window = new Window(this);
     this.fill_window();
     this.bind_swipe();
   }
@@ -72,14 +72,12 @@ Gallery = (function() {
     if (idx > SIZE) {
       return;
     }
-    console.log("switch to ", idx);
+    console.log("switch to ", idx + 1);
     direction = "forward";
     if (this.nearby(idx)) {
-      this.window.push_image();
-      this.window.slide();
-      this.window.remove_image();
+      this.window.push_and_slide(idx);
     } else {
-      this.window.replace_window();
+      this.window.replace_window(idx);
     }
     return this.idx = idx;
   };
@@ -93,41 +91,56 @@ Gallery = (function() {
 })();
 
 Window = (function() {
-  function Window() {}
+  function Window(gallery) {
+    this.gallery = gallery;
+  }
 
-  Window.prototype.push_image = function() {
+  Window.prototype.push_and_slide = function(idx) {
+    this.push_image(idx);
+    this.slide(idx);
+    return this.remove_image();
+  };
+
+  Window.prototype.push_image = function(idx) {
     var gallery, img;
 
     console.log("push");
     gallery = document.querySelector(".main");
     img = document.createElement("img");
-    img.dataset.id = 1;
     img.draggable = true;
-    img.src = "/issues_linux/5/02.jpg";
+    img.dataset.id = idx;
+    img.src = "/issues_linux/5/" + (this.pad(idx + 1)) + ".jpg";
     gallery.appendChild(img);
     img.style.opacity = 1;
     img.style.webkitTransform = "translate3d(100%, 0, 0)";
     return console.log(gallery);
   };
 
-  Window.prototype.slide = function() {
+  Window.prototype.slide = function(idx) {
     defer(function() {
       var img;
 
-      img = document.querySelector(".main img[data-id='0']");
+      img = document.querySelector(".main img[data-id='" + (idx - 1) + "']");
       return img.style.webkitTransform = "translate3d(-100%, 0, 0)";
     });
     return defer(function() {
       var img;
 
-      img = document.querySelector(".main img[data-id='1']");
+      img = document.querySelector(".main img[data-id='" + idx + "']");
       return img.style.webkitTransform = "translate3d(0, 0, 0)";
     });
   };
 
   Window.prototype.remove_image = function() {};
 
-  Window.prototype.replace_window = function() {};
+  Window.prototype.replace_window = function(idx) {};
+
+  Window.prototype.pad = function(num) {
+    var s;
+
+    s = "0" + num;
+    return s.substr(s.length - 2);
+  };
 
   return Window;
 
