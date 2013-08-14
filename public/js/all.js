@@ -73,7 +73,7 @@ if (!Function.prototype.bind) {
 })
 var Gallery, Image, PATH, SIZE, Window, defer, llog;
 
-PATH = "issues/05";
+PATH = "issues_linux/5";
 
 SIZE = 11 - 1;
 
@@ -167,7 +167,7 @@ Gallery = (function() {
 })();
 
 Window = (function() {
-  Window.prototype.images_dir = "issues/5";
+  Window.prototype.images_dir = PATH;
 
   function Window(gallery) {
     this.gallery = gallery;

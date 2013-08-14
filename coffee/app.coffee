@@ -1,6 +1,7 @@
 # confs
 
-PATH = "issues/05"
+# PATH = "issues/5"
+PATH = "issues_linux/5"
 SIZE = 11 -1 # as it's zero based
 
 # utils
@@ -17,8 +18,6 @@ class Gallery
     @idx = 0 # current index
     @images = []
     @window = new Window(this)
-    # console.log "gallery! #{PATH}, #{SIZE}"
-    # console.log "images: ", @images
     this.fill_window()
     this.bind_swipe()
 
@@ -78,27 +77,26 @@ class Gallery
     idx == @idx-1 || idx == @idx+1
 
 class Window
-  images_dir: "issues/5"
-  # images_dir: "issues_linux/5"
-  
+  images_dir: PATH
+
   constructor: (@gallery) ->
 
   # replace
-  
+
   replace_window: (idx) ->
     img = document.querySelector ".main img"
     img.remove()
 
     console.log "removed"
-    
+
     img = document.createElement "img"
     img.draggable = true
     img.dataset.id = idx
     img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
-    
+
     this.gallery_elem().appendChild img
     img.style.opacity = 1
-    
+
     img.style.webkitTransform = "translate3d(0, 0, 0)"
 
   # push_and_slide
@@ -108,12 +106,12 @@ class Window
 
   push_image: (idx) ->
     direction = this.direction idx
-    
+
     img = document.createElement "img"
     img.draggable = true
     img.dataset.id = idx
     img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
-      
+
     if direction == "next"
       this.gallery_elem().appendChild img
       img.style.opacity = 1
@@ -124,7 +122,7 @@ class Window
       img.style.opacity = 1
       # place on the left
       img.style.webkitTransform = "translate3d(-100%, 0, 0)"
-    
+
     this.slide direction, idx
 
   deferred_slide: (idx, percent) ->
@@ -133,12 +131,12 @@ class Window
       img.style.webkitTransform = "translate3d(#{percent}%, 0, 0)"
 
   slide: (direction, idx) ->
-    
+
     if direction == "next"
       this.deferred_slide idx-1, -100
     else
       this.deferred_slide idx+1, 100
-        
+
     this.deferred_slide idx, 0
 
     this.remove_image direction
@@ -152,11 +150,11 @@ class Window
         idx
       else
         idx
-        
-      img = document.querySelector ".main img[data-id='#{id}']"  
+
+      img = document.querySelector ".main img[data-id='#{id}']"
       img.remove()
       console.log "removed", idx
-      
+
     , 700
 
   # private
