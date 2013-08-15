@@ -1,7 +1,7 @@
 # confs
 
-PATH = "issues/5"
-# PATH = "issues_linux/5"
+# PATH = "issues/5"
+PATH = "issues_linux/5"
 SIZE = 11 -1 # as it's zero based
 
 
@@ -13,11 +13,11 @@ llog = (log) ->
 
 defer = (fn) ->
   setTimeout fn, 0
-  
+
 
 class Gallery
   zoomed: false
-  
+
   constructor:  ->
     @idx = 0 # current index
     @images = []
@@ -54,43 +54,50 @@ class Gallery
   # zoom
 
   scale_factor: "2, 2, 2"
+  # percent of x and y movements (used when panning the scaled version)
+  px: 0
+  py: 0
 
   handle_zoom: ->
     if !@zoomed then this.zoom() else this.dezoom()
     @zoomed = !@zoomed
-    
+
   zoom: ->
     img = document.querySelector ".main img"
     img.style.webkitTransform = "scale3d(#{this.scale_factor})"
     this.bind_movearound()
-    
-  dezoom: ->  
+
+  dezoom: ->
     img = document.querySelector ".main img"
     img.style.webkitTransform = "scale3d(1, 1, 1)"
-    this.unbind_movearound()    
+    this.unbind_movearound()
+    @px = 0
+    @py = 0
 
   bind_movearound: ->
     img = document.querySelector ".main img"
     img.addEventListener "drag", this.movearound
     # "dragend"
     img.addEventListener "dragend", (evt) =>
-      console.log "end", evt.pageX, evt.pageY
-      x = evt.pageX - @drag_start.x
-      y = evt.pageY - @drag_start.y 
-      console.log "moved", x, y
+      dx = evt.pageX - @drag_start.x
+      dy = evt.pageY - @drag_start.y
       # evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{x}%, #{y}%, 0)"
-      console.log this.scale_factor
-      evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{x}%, #{y}%, 0)"
-      
-      
+      px = dx / innerWidth  * 100
+      py = dy / innerHeight * 100
+      @px = px + @px
+      @py = py + @py
+      @px = Math.min 25, Math.max(-25, @px)
+      @py = Math.min 25, Math.max(-25, @py)
+      evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
+      # console.log "moved", @px, @py
+
     img.addEventListener "dragstart", (evt) =>
-      console.log "start", evt.pageX, evt.pageY
       @drag_start = { x: evt.pageX, y: evt.pageY }
       # evt.preventDefault()
-    
+
   unbind_movearound: ->
     # removeEventListener
- 
+
   movearound: (evt) ->
     # console.log "movearound", evt
     x = evt.pageX
@@ -98,7 +105,7 @@ class Gallery
     # console.log "moving", x, y
     # evt.target.style.webkitTransform = "translate3d(#{x}, #{y}, 0)"
     # evt.preventDefault()
- 
+
   # move
 
   next: ->
@@ -112,6 +119,8 @@ class Gallery
     return if idx < 0
     return if idx > SIZE
     @zoomed = false
+    @px = 0
+    @py = 0
     # console.log "switch to", idx+1
     # sanitize idx
 
@@ -258,10 +267,10 @@ domready ->
   next.addEventListener "click", gallery.next.bind gallery
   zoom = document.querySelector ".main .zoom"
   zoom.addEventListener "click", gallery.handle_zoom.bind gallery
-  
+
   #debug
   gallery.zoom()
-  
+
 #
 
 # failed attempt in using the low level api

@@ -73,7 +73,7 @@ if (!Function.prototype.bind) {
 })
 var Gallery, PATH, SIZE, Window, defer, llog;
 
-PATH = "issues/5";
+PATH = "issues_linux/5";
 
 SIZE = 11 - 1;
 
@@ -131,6 +131,10 @@ Gallery = (function() {
 
   Gallery.prototype.scale_factor = "2, 2, 2";
 
+  Gallery.prototype.px = 0;
+
+  Gallery.prototype.py = 0;
+
   Gallery.prototype.handle_zoom = function() {
     if (!this.zoomed) {
       this.zoom();
@@ -153,7 +157,9 @@ Gallery = (function() {
 
     img = document.querySelector(".main img");
     img.style.webkitTransform = "scale3d(1, 1, 1)";
-    return this.unbind_movearound();
+    this.unbind_movearound();
+    this.px = 0;
+    return this.py = 0;
   };
 
   Gallery.prototype.bind_movearound = function() {
@@ -163,17 +169,19 @@ Gallery = (function() {
     img = document.querySelector(".main img");
     img.addEventListener("drag", this.movearound);
     img.addEventListener("dragend", function(evt) {
-      var x, y;
+      var dx, dy, px, py;
 
-      console.log("end", evt.pageX, evt.pageY);
-      x = evt.pageX - _this.drag_start.x;
-      y = evt.pageY - _this.drag_start.y;
-      console.log("moved", x, y);
-      console.log(_this.scale_factor);
-      return evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + x + "%, " + y + "%, 0)";
+      dx = evt.pageX - _this.drag_start.x;
+      dy = evt.pageY - _this.drag_start.y;
+      px = dx / innerWidth * 100;
+      py = dy / innerHeight * 100;
+      _this.px = px + _this.px;
+      _this.py = py + _this.py;
+      _this.px = Math.min(25, Math.max(-25, _this.px));
+      _this.py = Math.min(25, Math.max(-25, _this.py));
+      return evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + _this.px + "%, " + _this.py + "%, 0)";
     });
     return img.addEventListener("dragstart", function(evt) {
-      console.log("start", evt.pageX, evt.pageY);
       return _this.drag_start = {
         x: evt.pageX,
         y: evt.pageY
@@ -211,6 +219,8 @@ Gallery = (function() {
       return;
     }
     this.zoomed = false;
+    this.px = 0;
+    this.py = 0;
     direction = "forward";
     if (this.nearby(idx)) {
       this.window.push_and_slide(idx);
