@@ -1,7 +1,7 @@
 # confs
 
-# PATH = "issues/5"
-PATH = "issues_linux/5"
+PATH = "issues/5"
+# PATH = "issues_linux/5"
 SIZE = 11 -1 # as it's zero based
 
 
@@ -13,8 +13,11 @@ llog = (log) ->
 
 defer = (fn) ->
   setTimeout fn, 0
+  
 
 class Gallery
+  zoomed: false
+  
   constructor:  ->
     @idx = 0 # current index
     @images = []
@@ -35,7 +38,6 @@ class Gallery
   # handlers
 
   handle_swipe: ->
-    console.log "swipe"
     llog "swipe"
     this.next()
 
@@ -49,6 +51,56 @@ class Gallery
 
   # actions
 
+  # zoom
+
+  scale_factor: "2, 2, 2"
+
+  handle_zoom: ->
+    if !@zoomed then this.zoom() else this.dezoom()
+    @zoomed = !@zoomed
+    
+  zoom: ->
+    img = document.querySelector ".main img"
+    img.style.webkitTransform = "scale3d(#{this.scale_factor})"
+    this.bind_movearound()
+    
+  dezoom: ->  
+    img = document.querySelector ".main img"
+    img.style.webkitTransform = "scale3d(1, 1, 1)"
+    this.unbind_movearound()    
+
+  bind_movearound: ->
+    img = document.querySelector ".main img"
+    img.addEventListener "drag", this.movearound
+    # "dragend"
+    img.addEventListener "dragend", (evt) =>
+      console.log "end", evt.pageX, evt.pageY
+      x = evt.pageX - @drag_start.x
+      y = evt.pageY - @drag_start.y 
+      console.log "moved", x, y
+      # evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{x}%, #{y}%, 0)"
+      console.log this.scale_factor
+      evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{x}%, #{y}%, 0)"
+      
+      
+    img.addEventListener "dragstart", (evt) =>
+      console.log "start", evt.pageX, evt.pageY
+      @drag_start = { x: evt.pageX, y: evt.pageY }
+      # evt.preventDefault()
+    
+  unbind_movearound: ->
+    # removeEventListener
+ 
+  movearound: (evt) ->
+    # console.log "movearound", evt
+    x = evt.pageX
+    y = evt.pageY
+    # console.log "moving", x, y
+    # evt.target.style.webkitTransform = "translate3d(#{x}, #{y}, 0)"
+    # evt.preventDefault()
+ 
+  # move
+
   next: ->
     this.go_to @idx+1
 
@@ -59,7 +111,8 @@ class Gallery
     return if @idx == idx
     return if idx < 0
     return if idx > SIZE
-    console.log "switch to", idx+1
+    @zoomed = false
+    # console.log "switch to", idx+1
     # sanitize idx
 
     direction = "forward"
@@ -142,7 +195,7 @@ class Window
   remove_func: (idx) ->
     img = document.querySelector ".main img[data-id='#{idx}']"
     img.remove()
-    console.log "removed #{idx}", event
+    # console.log "removed #{idx}", event
 
   remove_image: (idx) ->
     # images = document.querySelectorAll ".main img"
@@ -153,7 +206,7 @@ class Window
     # idx = @gallery.idx
 
 
-    console.log "will remove #{idx}"
+    # console.log "will remove #{idx}"
 
     # this.delayed_remove remove_func
     img = document.querySelector ".main img"
@@ -203,7 +256,12 @@ domready ->
   prev.addEventListener "click", gallery.prev.bind gallery
   next = document.querySelector ".main .next"
   next.addEventListener "click", gallery.next.bind gallery
-
+  zoom = document.querySelector ".main .zoom"
+  zoom.addEventListener "click", gallery.handle_zoom.bind gallery
+  
+  #debug
+  gallery.zoom()
+  
 #
 
 # failed attempt in using the low level api

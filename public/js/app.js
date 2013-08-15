@@ -1,6 +1,6 @@
 var Gallery, PATH, SIZE, Window, defer, llog;
 
-PATH = "issues_linux/5";
+PATH = "issues/5";
 
 SIZE = 11 - 1;
 
@@ -16,6 +16,8 @@ defer = function(fn) {
 };
 
 Gallery = (function() {
+  Gallery.prototype.zoomed = false;
+
   function Gallery() {
     this.idx = 0;
     this.images = [];
@@ -34,7 +36,6 @@ Gallery = (function() {
   };
 
   Gallery.prototype.handle_swipe = function() {
-    console.log("swipe");
     llog("swipe");
     return this.next();
   };
@@ -53,6 +54,67 @@ Gallery = (function() {
 
     id = evt.target.dataset.id;
     return this.go_to(parseInt(id));
+  };
+
+  Gallery.prototype.scale_factor = "2, 2, 2";
+
+  Gallery.prototype.handle_zoom = function() {
+    if (!this.zoomed) {
+      this.zoom();
+    } else {
+      this.dezoom();
+    }
+    return this.zoomed = !this.zoomed;
+  };
+
+  Gallery.prototype.zoom = function() {
+    var img;
+
+    img = document.querySelector(".main img");
+    img.style.webkitTransform = "scale3d(" + this.scale_factor + ")";
+    return this.bind_movearound();
+  };
+
+  Gallery.prototype.dezoom = function() {
+    var img;
+
+    img = document.querySelector(".main img");
+    img.style.webkitTransform = "scale3d(1, 1, 1)";
+    return this.unbind_movearound();
+  };
+
+  Gallery.prototype.bind_movearound = function() {
+    var img,
+      _this = this;
+
+    img = document.querySelector(".main img");
+    img.addEventListener("drag", this.movearound);
+    img.addEventListener("dragend", function(evt) {
+      var x, y;
+
+      console.log("end", evt.pageX, evt.pageY);
+      x = evt.pageX - _this.drag_start.x;
+      y = evt.pageY - _this.drag_start.y;
+      console.log("moved", x, y);
+      console.log(_this.scale_factor);
+      return evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + x + "%, " + y + "%, 0)";
+    });
+    return img.addEventListener("dragstart", function(evt) {
+      console.log("start", evt.pageX, evt.pageY);
+      return _this.drag_start = {
+        x: evt.pageX,
+        y: evt.pageY
+      };
+    });
+  };
+
+  Gallery.prototype.unbind_movearound = function() {};
+
+  Gallery.prototype.movearound = function(evt) {
+    var x, y;
+
+    x = evt.pageX;
+    return y = evt.pageY;
   };
 
   Gallery.prototype.next = function() {
@@ -75,7 +137,7 @@ Gallery = (function() {
     if (idx > SIZE) {
       return;
     }
-    console.log("switch to", idx + 1);
+    this.zoomed = false;
     direction = "forward";
     if (this.nearby(idx)) {
       this.window.push_and_slide(idx);
@@ -164,15 +226,13 @@ Window = (function() {
     var img;
 
     img = document.querySelector(".main img[data-id='" + idx + "']");
-    img.remove();
-    return console.log("removed " + idx, event);
+    return img.remove();
   };
 
   Window.prototype.remove_image = function(idx) {
     var img,
       _this = this;
 
-    console.log("will remove " + idx);
     img = document.querySelector(".main img");
     return img.addEventListener("webkitTransitionEnd", function() {
       return _this.remove_func(idx);
@@ -223,7 +283,7 @@ Window = (function() {
 })();
 
 domready(function() {
-  var gallery, next, prev, thumb, thumbs, _i, _len;
+  var gallery, next, prev, thumb, thumbs, zoom, _i, _len;
 
   gallery = new Gallery();
   window.gallery = gallery;
@@ -236,5 +296,8 @@ domready(function() {
   prev = document.querySelector(".main .prev");
   prev.addEventListener("click", gallery.prev.bind(gallery));
   next = document.querySelector(".main .next");
-  return next.addEventListener("click", gallery.next.bind(gallery));
+  next.addEventListener("click", gallery.next.bind(gallery));
+  zoom = document.querySelector(".main .zoom");
+  zoom.addEventListener("click", gallery.handle_zoom.bind(gallery));
+  return gallery.zoom();
 });
