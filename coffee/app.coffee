@@ -1,8 +1,9 @@
 # confs
 
-PATH = "issues/5"
-#PATH = "issues_linux/5"
+# PATH = "issues/5"
+PATH = "issues_linux/5"
 SIZE = 11 -1 # as it's zero based
+
 
 # utils
 
@@ -84,10 +85,9 @@ class Window
   # replace
 
   replace_window: (idx) ->
-    img = document.querySelector ".main img"
-    img.remove()
-
-    console.log "removed"
+    images = document.querySelectorAll ".main img"
+    for img in images
+      img.remove()
 
     img = document.createElement "img"
     img.draggable = true
@@ -131,33 +131,48 @@ class Window
       img.style.webkitTransform = "translate3d(#{percent}%, 0, 0)"
 
   slide: (direction, idx) ->
-
-    if direction == "next"
-      this.deferred_slide idx-1, -100
-    else
-      this.deferred_slide idx+1, 100
+    next_id = if direction == "next" then idx-1 else idx+1
+    position = if direction == "next" then -100 else 100
+    this.deferred_slide next_id, position
 
     this.deferred_slide idx, 0
 
-    this.remove_image direction
+    this.remove_image next_id, direction
 
-  remove_image: (direction) ->
-    idx = @gallery.idx
+  remove_func: (idx) ->
+    img = document.querySelector ".main img[data-id='#{idx}']"
+    img.remove()
+    console.log "removed #{idx}", event
 
-    # after slide event, instead of timeout
-    setTimeout =>
-      id = if direction == "next"
-        idx
-      else
-        idx
+  remove_image: (idx) ->
+    # images = document.querySelectorAll ".main img"
+    # for img in images
+    #   img.removeEventListener "webkitTransitionEnd", => this.remove_func(idx)
+    #   console.log "remove listeners"
 
-      img = document.querySelector ".main img[data-id='#{id}']"
-      img.remove()
-      console.log "removed", idx
+    # idx = @gallery.idx
 
-    , 700
+
+    console.log "will remove #{idx}"
+
+    # this.delayed_remove remove_func
+    img = document.querySelector ".main img"
+    img.addEventListener "webkitTransitionEnd", => this.remove_func(idx)
 
   # private
+
+  webkit_is_supported: ->
+    true
+
+  delayed_remove: (func) ->
+    if this.webkit_is_supported()
+      img = document.querySelector ".main img"
+      img.addEventListener "webkitTransitionEnd", =>
+        func()
+    else
+      setTimeout =>
+         func()
+      , 700
 
   gallery_elem: ->
     document.querySelector ".main"
@@ -168,11 +183,6 @@ class Window
   pad: (num) ->
     s = "0" + num
     s.substr s.length-2
-
-
-class Image
-  constructor: (@images) ->
-    console.log "img"
 
 
 # main
@@ -189,6 +199,12 @@ domready ->
   for thumb in thumbs
     thumb.addEventListener "click", gallery.handle_thumbs_click.bind gallery
 
-
+  prev = document.querySelector ".main .prev"
+  prev.addEventListener "click", gallery.prev.bind gallery
+  next = document.querySelector ".main .next"
+  next.addEventListener "click", gallery.next.bind gallery
 
 #
+
+# failed attempt in using the low level api
+# img = document.querySelector("img"); evt = new WebKitTransitionEvent("asd"); evt.cancelable = true; evt.currentTarget = img; evt.propertyName = "-webkit-transform"; evt.eventPhase = 2; evt.initEvent("asd"); evt

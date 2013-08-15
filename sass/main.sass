@@ -106,3 +106,29 @@ html, body
 
 img.fast
   +transition(all 0)
+
+.main a
+  position: absolute
+  top: 45%
+  font-size: 1.8em
+  font-weight: bold
+  color: white
+  padding: 5px 6px
+  z-index: 2
+  background: rgba(200, 200, 200, 0.3)
+  &:hover
+    background: rgba(200, 200, 200, 0.5)
+
+.main a.zoom
+  left: 0
+  top: 0
+  font-size: 2.1em
+  padding-right: 8px
+
+.main a.prev
+  left: 0
+  padding-right: 8px
+
+.main a.next
+  right: 0
+  padding-left: 8px

@@ -1,6 +1,6 @@
-var Gallery, Image, PATH, SIZE, Window, defer, llog;
+var Gallery, PATH, SIZE, Window, defer, llog;
 
-PATH = "issues/5";
+PATH = "issues_linux/5";
 
 SIZE = 11 - 1;
 
@@ -101,11 +101,13 @@ Window = (function() {
   }
 
   Window.prototype.replace_window = function(idx) {
-    var img;
+    var images, img, _i, _len;
 
-    img = document.querySelector(".main img");
-    img.remove();
-    console.log("removed");
+    images = document.querySelectorAll(".main img");
+    for (_i = 0, _len = images.length; _i < _len; _i++) {
+      img = images[_i];
+      img.remove();
+    }
     img = document.createElement("img");
     img.draggable = true;
     img.dataset.id = idx;
@@ -149,28 +151,52 @@ Window = (function() {
   };
 
   Window.prototype.slide = function(direction, idx) {
-    if (direction === "next") {
-      this.deferred_slide(idx - 1, -100);
-    } else {
-      this.deferred_slide(idx + 1, 100);
-    }
+    var next_id, position;
+
+    next_id = direction === "next" ? idx - 1 : idx + 1;
+    position = direction === "next" ? -100 : 100;
+    this.deferred_slide(next_id, position);
     this.deferred_slide(idx, 0);
-    return this.remove_image(direction);
+    return this.remove_image(next_id, direction);
   };
 
-  Window.prototype.remove_image = function(direction) {
-    var idx,
+  Window.prototype.remove_func = function(idx) {
+    var img;
+
+    img = document.querySelector(".main img[data-id='" + idx + "']");
+    img.remove();
+    return console.log("removed " + idx, event);
+  };
+
+  Window.prototype.remove_image = function(idx) {
+    var img,
       _this = this;
 
-    idx = this.gallery.idx;
-    return setTimeout(function() {
-      var id, img;
+    console.log("will remove " + idx);
+    img = document.querySelector(".main img");
+    return img.addEventListener("webkitTransitionEnd", function() {
+      return _this.remove_func(idx);
+    });
+  };
 
-      id = direction === "next" ? idx : idx;
-      img = document.querySelector(".main img[data-id='" + id + "']");
-      img.remove();
-      return console.log("removed", idx);
-    }, 700);
+  Window.prototype.webkit_is_supported = function() {
+    return true;
+  };
+
+  Window.prototype.delayed_remove = function(func) {
+    var img,
+      _this = this;
+
+    if (this.webkit_is_supported()) {
+      img = document.querySelector(".main img");
+      return img.addEventListener("webkitTransitionEnd", function() {
+        return func();
+      });
+    } else {
+      return setTimeout(function() {
+        return func();
+      }, 700);
+    }
   };
 
   Window.prototype.gallery_elem = function() {
@@ -196,27 +222,19 @@ Window = (function() {
 
 })();
 
-Image = (function() {
-  function Image(images) {
-    this.images = images;
-    console.log("img");
-  }
-
-  return Image;
-
-})();
-
 domready(function() {
-  var gallery, thumb, thumbs, _i, _len, _results;
+  var gallery, next, prev, thumb, thumbs, _i, _len;
 
   gallery = new Gallery();
   window.gallery = gallery;
   window.addEventListener("keydown", gallery.handle_keyboard.bind(gallery));
   thumbs = document.querySelectorAll(".thumbs img");
-  _results = [];
   for (_i = 0, _len = thumbs.length; _i < _len; _i++) {
     thumb = thumbs[_i];
-    _results.push(thumb.addEventListener("click", gallery.handle_thumbs_click.bind(gallery)));
+    thumb.addEventListener("click", gallery.handle_thumbs_click.bind(gallery));
   }
-  return _results;
+  prev = document.querySelector(".main .prev");
+  prev.addEventListener("click", gallery.prev.bind(gallery));
+  next = document.querySelector(".main .next");
+  return next.addEventListener("click", gallery.next.bind(gallery));
 });
