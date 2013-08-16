@@ -25,19 +25,28 @@ class Gallery
     @images = []
     @window = new Window(this)
     this.fill_window()
-    this.bind_swipe()
+    # this.bind_swipe()
 
   # init
 
   fill_window: ->
 
 
-  bind_swipe: ->
-    img = document.querySelector ".main img[data-id='0']"
-    img.addEventListener "touchend", this.handle_swipe.bind this
-
-
   # handlers
+
+  handle_zmove_start: (evt) ->
+    touch = evt.touches[0]
+    @start_zoom_touch = evt
+    
+  handle_zmove_end: (evt) ->
+    # console.log @start_zoom_touch
+    end = evt.changedTouches[0]
+    # console.log evt
+    start = @start_zoom_touch
+    x = end.pageX - start.pageX
+    y = end.pageY - start.pageY
+    console.log "zoom end", x, y
+    
 
   handle_swipe: ->
     llog "swipe"
@@ -75,27 +84,60 @@ class Gallery
     this.unbind_movearound()
     @px = 0
     @py = 0
-
+    
+  handle_zdrag_start: (evt) ->
+    # @drag_start = { x: evt.pageX, y: evt.pageY }
+    @drag_start = evt
+    
+  handle_zdrag_end: (evt) ->
+    dx = evt.x - @drag_start.x
+    dy = evt.y - @drag_start.y
+    px = dx / innerWidth  * 100
+    py = dy / innerHeight * 100
+    @px = px + @px
+    @py = py + @py
+    @px = Math.min 25, Math.max(-25, @px)
+    @py = Math.min 25, Math.max(-25, @py)
+    evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
+    # console.log "moved", @px, @py
+  
+  create_event: (name, location) ->
+    evt = new Event name
+    evt.x = location.pageX
+    evt.y = location.pageY
+    evt
+    
   bind_movearound: ->
     img = document.querySelector ".main img"
-    img.addEventListener "drag", this.movearound
-    # "dragend"
-    img.addEventListener "dragend", (evt) =>
-      dx = evt.pageX - @drag_start.x
-      dy = evt.pageY - @drag_start.y
-      # evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{x}%, #{y}%, 0)"
-      px = dx / innerWidth  * 100
-      py = dy / innerHeight * 100
-      @px = px + @px
-      @py = py + @py
-      @px = Math.min 25, Math.max(-25, @px)
-      @py = Math.min 25, Math.max(-25, @py)
-      evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
-      # console.log "moved", @px, @py
+    # img.addEventListener "drag", this.movearound
+    
+    # img.addEventListener "dragstart",  this.handle_zdrag_start.bind this
+    #   # evt.preventDefault() ?
+    # img.addEventListener "dragend",  this.handle_zdrag_end.bind this
+    
+    img.addEventListener "dragstart", (event) =>
+      evt = this.create_event "zstart", event
+      img.dispatchEvent evt
+      # evt.preventDefault() ?
 
-    img.addEventListener "dragstart", (evt) =>
-      @drag_start = { x: evt.pageX, y: evt.pageY }
-      # evt.preventDefault()
+    img.addEventListener "touchstart", (event) =>
+      evt = this.create_event "zstart", event.touches[0]
+      img.dispatchEvent evt
+      
+    img.addEventListener "dragend", (event) =>
+      evt = this.create_event "zend", event
+      img.dispatchEvent evt
+    
+    img.addEventListener "touchend", (event) =>
+      evt = this.create_event "zend", event.changedTouches[0]
+      img.dispatchEvent evt
+
+      
+    img.addEventListener "zstart", this.handle_zdrag_start.bind this  
+    
+    img.addEventListener "zend", this.handle_zdrag_end.bind this
+    # img.r
+
 
   unbind_movearound: ->
     # removeEventListener
@@ -205,6 +247,8 @@ class Window
 
   remove_func: (idx) ->
     img = document.querySelector ".main img[data-id='#{idx}']"
+    # FIXME: apparently .remove() doesn't works in safari
+    console.log "remove", idx
     img.remove()
     # console.log "removed #{idx}", event
 
@@ -215,8 +259,6 @@ class Window
     #   console.log "remove listeners"
 
     # idx = @gallery.idx
-
-
     # console.log "will remove #{idx}"
 
     # this.delayed_remove remove_func
