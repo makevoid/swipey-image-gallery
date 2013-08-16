@@ -112,7 +112,8 @@ Gallery = (function() {
   };
 
   Gallery.prototype.handle_zdrag_end = function(evt) {
-    var dx, dy, px, py;
+    var dx, dy, px, py,
+      _this = this;
 
     dx = evt.x - this.drag_start.x;
     dy = evt.y - this.drag_start.y;
@@ -122,7 +123,9 @@ Gallery = (function() {
     this.py = py + this.py;
     this.px = Math.min(25, Math.max(-25, this.px));
     this.py = Math.min(25, Math.max(-25, this.py));
-    return evt.target.style.webkitTransform = "scale3d(" + this.scale_factor + ") translate3d(" + this.px + "%, " + this.py + "%, 0)";
+    return defer(function() {
+      return evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + _this.px + "%, " + _this.py + "%, 0)";
+    });
   };
 
   Gallery.prototype.create_event = function(name, location) {
@@ -241,7 +244,7 @@ Window = (function() {
       removeElement(img);
     }
     img = document.createElement("img");
-    img.draggable = true;
+    img.draggable = false;
     img.dataset.id = idx;
     img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
     this.gallery_elem().appendChild(img);
@@ -258,7 +261,7 @@ Window = (function() {
 
     direction = this.direction(idx);
     img = document.createElement("img");
-    img.draggable = true;
+    img.draggable = false;
     img.dataset.id = idx;
     img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
     if (direction === "next") {

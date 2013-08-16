@@ -106,7 +106,8 @@ class Gallery
     @py = py + @py
     @px = Math.min 25, Math.max(-25, @px)
     @py = Math.min 25, Math.max(-25, @py)
-    evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
+    defer =>
+      evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
     # console.log "moved", @px, @py
   
   create_event: (name, location) ->
@@ -214,7 +215,7 @@ class Window
       removeElement img
 
     img = document.createElement "img"
-    img.draggable = true
+    img.draggable = false
     img.dataset.id = idx
     img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
 
@@ -232,7 +233,7 @@ class Window
     direction = this.direction idx
 
     img = document.createElement "img"
-    img.draggable = true
+    img.draggable = false
     img.dataset.id = idx
     img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
 
