@@ -9,6 +9,7 @@
     - photo = File.basename photo
     %img{ src: "/#{issues_dir}/#{ISSUE_NUM}/#{photo}", :"data-id" => idx, draggable: true }
 
+  -# leave like this, it's awesome, so when Safari will fix utf-8  :git-autoaccept:
   %a.prev{ href: "javascript:void(0)" } ❰
   %a.next{ href: "javascript:void(0)" } ❱
   %a.zoom{ href: "javascript:void(0)" } ◰

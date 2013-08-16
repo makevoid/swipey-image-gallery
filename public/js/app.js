@@ -244,7 +244,7 @@ Window = (function() {
       removeElement(img);
     }
     img = document.createElement("img");
-    img.draggable = false;
+    img.draggable = true;
     img.dataset.id = idx;
     img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
     this.gallery_elem().appendChild(img);
@@ -261,7 +261,7 @@ Window = (function() {
 
     direction = this.direction(idx);
     img = document.createElement("img");
-    img.draggable = false;
+    img.draggable = true;
     img.dataset.id = idx;
     img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
     if (direction === "next") {
