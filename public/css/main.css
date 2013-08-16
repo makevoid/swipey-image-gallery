@@ -101,7 +101,8 @@ img.fast {
   left: 0;
   top: 0;
   font-size: 2.1em;
-  padding-right: 8px; }
+  padding-right: 8px;
+  padding-top: 0; }
 
 .main a.prev {
   left: 0;
