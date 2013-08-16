@@ -1,4 +1,4 @@
-var Gallery, PATH, SIZE, Window, defer, json, llog;
+var Gallery, PATH, SIZE, Window, defer, json, llog, removeElement;
 
 json = JSON.parse(ISSUES_JSON);
 
@@ -15,6 +15,10 @@ llog = function(log) {
 
 defer = function(fn) {
   return setTimeout(fn, 0);
+};
+
+removeElement = function(elem) {
+  return elem.parentNode.removeChild(elem);
 };
 
 Gallery = (function() {
@@ -99,7 +103,8 @@ Gallery = (function() {
     img.style.webkitTransform = "scale3d(1, 1, 1)";
     this.unbind_movearound();
     this.px = 0;
-    return this.py = 0;
+    this.py = 0;
+    return this.remove_all_listeners(img);
   };
 
   Gallery.prototype.handle_zdrag_start = function(evt) {
@@ -207,6 +212,15 @@ Gallery = (function() {
     return idx === this.idx - 1 || idx === this.idx + 1;
   };
 
+  Gallery.prototype.remove_all_listeners = function(elem) {
+    var copy;
+
+    copy = elem.cloneNode();
+    elem.parentElement.insertBefore(copy);
+    copy.style.opacity = 1;
+    return removeElement(elem);
+  };
+
   return Gallery;
 
 })();
@@ -224,7 +238,7 @@ Window = (function() {
     images = document.querySelectorAll(".main img");
     for (_i = 0, _len = images.length; _i < _len; _i++) {
       img = images[_i];
-      img.remove();
+      removeElement(img);
     }
     img = document.createElement("img");
     img.draggable = true;
@@ -282,8 +296,7 @@ Window = (function() {
     var img;
 
     img = document.querySelector(".main img[data-id='" + idx + "']");
-    console.log("remove", idx);
-    return img.remove();
+    return removeElement(img);
   };
 
   Window.prototype.remove_image = function(idx) {

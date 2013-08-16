@@ -1,3 +1,7 @@
+# TODO: 
+#
+# - detect double click to zoom and de-zoom
+
 # confs (taken from ruby)
 
 json = JSON.parse(ISSUES_JSON)
@@ -15,6 +19,9 @@ llog = (log) ->
 defer = (fn) ->
   setTimeout fn, 0
 
+removeElement = (elem) ->
+  # use .remove() when possible, will delete when Safari/MobileSafari will update the syntax?
+  elem.parentNode.removeChild elem
 
 class Gallery
   zoomed: false
@@ -84,6 +91,7 @@ class Gallery
     this.unbind_movearound()
     @px = 0
     @py = 0
+    this.remove_all_listeners img
     
   handle_zdrag_start: (evt) ->
     # @drag_start = { x: evt.pageX, y: evt.pageY }
@@ -178,10 +186,20 @@ class Gallery
     # async? (called inside window)
     @idx = idx
 
+  # private
+
   # utils
 
   nearby: (idx) ->
     idx == @idx-1 || idx == @idx+1
+
+  remove_all_listeners: (elem) ->
+    copy = elem.cloneNode()
+    elem.parentElement.insertBefore copy
+    # roperty_name duration timing_function delay;
+    copy.style.opacity = 1
+    removeElement elem
+
 
 class Window
   images_dir: PATH
@@ -193,7 +211,7 @@ class Window
   replace_window: (idx) ->
     images = document.querySelectorAll ".main img"
     for img in images
-      img.remove()
+      removeElement img
 
     img = document.createElement "img"
     img.draggable = true
@@ -247,9 +265,7 @@ class Window
 
   remove_func: (idx) ->
     img = document.querySelector ".main img[data-id='#{idx}']"
-    # FIXME: apparently .remove() doesn't works in safari
-    console.log "remove", idx
-    img.remove()
+    removeElement img
     # console.log "removed #{idx}", event
 
   remove_image: (idx) ->
