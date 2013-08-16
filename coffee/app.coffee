@@ -1,8 +1,9 @@
-# confs
+# confs (taken from ruby)
 
-# PATH = "issues/5"
-PATH = "issues_linux/5"
-SIZE = 11 -1 # as it's zero based
+json = JSON.parse(ISSUES_JSON)
+
+PATH = json.path
+SIZE = json.size
 
 
 # utils
@@ -269,7 +270,7 @@ domready ->
   zoom.addEventListener "click", gallery.handle_zoom.bind gallery
 
   #debug
-  gallery.zoom()
+  # gallery.zoom()
 
 #
 

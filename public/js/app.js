@@ -1,8 +1,10 @@
-var Gallery, PATH, SIZE, Window, defer, llog;
+var Gallery, PATH, SIZE, Window, defer, json, llog;
 
-PATH = "issues_linux/5";
+json = JSON.parse(ISSUES_JSON);
 
-SIZE = 11 - 1;
+PATH = json.path;
+
+SIZE = json.size;
 
 llog = function(log) {
   var debug;
@@ -308,6 +310,5 @@ domready(function() {
   next = document.querySelector(".main .next");
   next.addEventListener("click", gallery.next.bind(gallery));
   zoom = document.querySelector(".main .zoom");
-  zoom.addEventListener("click", gallery.handle_zoom.bind(gallery));
-  return gallery.zoom();
+  return zoom.addEventListener("click", gallery.handle_zoom.bind(gallery));
 });

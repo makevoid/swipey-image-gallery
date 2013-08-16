@@ -4,6 +4,9 @@
   %head
     %title= TITLE
     %link{ rel: "stylesheet", href: "/css/main.css" }
+    :javascript
+      var ISSUES_JSON = '#{issues_json}'
+
     %script{ type: "text/javascript", src: "/js/all.js", async: "true" }
     = partial :metas
   %body

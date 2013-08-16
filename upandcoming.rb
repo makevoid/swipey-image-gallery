@@ -25,7 +25,7 @@ class Upandcoming < Sinatra::Base
 
   # confs
 
-  ISSUE_NUM = 5 # defines the directory whre the issue images are
+  ISSUE_NUM = 4 # defines the directory whre the issue images are
 
   #
 
@@ -39,6 +39,11 @@ class Upandcoming < Sinatra::Base
       all.sort_by do |img|
         File.basename(img).to_i
       end
+    end
+
+
+    def issues_json
+      { path: "#{@@issues_dir}/#{ISSUE_NUM}", size: photos.size }.to_json
     end
   end
 
