@@ -93,6 +93,8 @@ defer = function(fn) {
 Gallery = (function() {
   Gallery.prototype.zoomed = false;
 
+  Gallery.prototype.size = SIZE;
+
   function Gallery() {
     this.idx = 0;
     this.images = [];
@@ -217,7 +219,7 @@ Gallery = (function() {
     if (idx < 0) {
       return;
     }
-    if (idx > SIZE) {
+    if (idx > this.size) {
       return;
     }
     this.zoomed = false;
@@ -368,7 +370,7 @@ Window = (function() {
 })();
 
 domready(function() {
-  var gallery, next, prev, thumb, thumbs, zoom, _i, _len;
+  var gallery, next, prev, thumb, thumb_width, thumbs, thumbs_cont, width, zoom, _i, _len;
 
   gallery = new Gallery();
   window.gallery = gallery;
@@ -378,6 +380,10 @@ domready(function() {
     thumb = thumbs[_i];
     thumb.addEventListener("click", gallery.handle_thumbs_click.bind(gallery));
   }
+  thumb_width = 80;
+  width = (thumb_width + 8) * gallery.size;
+  thumbs_cont = document.querySelector(".thumbs");
+  thumbs_cont.style.width = "" + width + "px";
   prev = document.querySelector(".main .prev");
   prev.addEventListener("click", gallery.prev.bind(gallery));
   next = document.querySelector(".main .next");

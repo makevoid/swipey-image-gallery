@@ -18,6 +18,7 @@ defer = (fn) ->
 
 class Gallery
   zoomed: false
+  size: SIZE
 
   constructor:  ->
     @idx = 0 # current index
@@ -118,7 +119,7 @@ class Gallery
   go_to: (idx) ->
     return if @idx == idx
     return if idx < 0
-    return if idx > SIZE
+    return if idx > @size
     @zoomed = false
     @px = 0
     @py = 0
@@ -261,6 +262,11 @@ domready ->
   thumbs = document.querySelectorAll ".thumbs img"
   for thumb in thumbs
     thumb.addEventListener "click", gallery.handle_thumbs_click.bind gallery
+  # resize thumbs
+  thumb_width = 80
+  width = (thumb_width+8) * gallery.size
+  thumbs_cont = document.querySelector ".thumbs"
+  thumbs_cont.style.width = "#{width}px"
 
   prev = document.querySelector ".main .prev"
   prev.addEventListener "click", gallery.prev.bind gallery
