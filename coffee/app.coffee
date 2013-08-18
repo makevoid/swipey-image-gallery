@@ -1,9 +1,3 @@
-# TODO:
-#
-# - detect double click to zoom and de-zoom
-
-# confs (taken from ruby)
-
 json = JSON.parse(ISSUES_JSON)
 
 PATH = json.path
@@ -39,12 +33,15 @@ class Gallery
     @idx = 0 # current index
     @images = []
     @window = new Window(this)
-    this.fill_window()
+    # this.fill_window()
     # this.bind_swipe()
+
 
   # init
 
   fill_window: ->
+
+  bind_swipe: ->
 
 
   # handlers
@@ -75,6 +72,7 @@ class Gallery
     id = evt.target.dataset.id
     this.go_to parseInt(id)
 
+
   # actions
 
   # zoom
@@ -100,10 +98,8 @@ class Gallery
     @px = 0
     @py = 0
     this.remove_all_listeners img
-    document.removeEventListener "mouseup", this.handle_mouseup
 
   handle_zdrag_start: (evt) ->
-    # @drag_start = { x: evt.pageX, y: evt.pageY }
     @drag_start = evt
 
   handle_zdrag_end: (evt) ->
@@ -118,7 +114,7 @@ class Gallery
     @py = Math.min 25, Math.max(-25, @py)
     defer =>
       evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
-    # console.log "moved", @px, @py
+
 
   create_event: (name, location) ->
     evt = new Event name
@@ -131,15 +127,14 @@ class Gallery
     img = document.querySelector ".main img"
     img.dispatchEvent evt
 
+  unbind_movearound: ->
+    document.removeEventListener "mouseup", this.handle_mouseup
+
   bind_movearound: ->
     img = document.querySelector ".main img"
-    # img.addEventListener "drag", this.movearound
 
-    # img.addEventListener "dragstart",  this.handle_zdrag_start.bind this
-    #   # evt.preventDefault() ?
-    # img.addEventListener "dragend",  this.handle_zdrag_end.bind this
+    # using old api
 
-    # TODO: use mousedown e mousemove
     img.addEventListener "mousedown", (event) =>
       evt = this.create_event "zstart", event
       img.dispatchEvent evt
@@ -172,19 +167,7 @@ class Gallery
     img.addEventListener "zstart", this.handle_zdrag_start.bind this
 
     img.addEventListener "zend", this.handle_zdrag_end.bind this
-    # img.r
 
-
-  unbind_movearound: ->
-    # removeEventListener
-
-  movearound: (evt) ->
-    # console.log "movearound", evt
-    x = evt.pageX
-    y = evt.pageY
-    # console.log "moving", x, y
-    # evt.target.style.webkitTransform = "translate3d(#{x}, #{y}, 0)"
-    # evt.preventDefault()
 
   # move
 
@@ -201,8 +184,6 @@ class Gallery
     @zoomed = false
     @px = 0
     @py = 0
-    # console.log "switch to", idx+1
-    # sanitize idx
 
     direction = "forward"
 
@@ -211,7 +192,6 @@ class Gallery
     else
       @window.replace_window(idx)
 
-    # async? (called inside window)
     @idx = idx
 
   # private
@@ -292,9 +272,10 @@ class Window
   remove_func: (idx) ->
     img = document.querySelector ".main img[data-id='#{idx}']"
     removeElement img
-    # console.log "removed #{idx}", event
 
   remove_image: (idx) ->
+    # FIXME: use webkitTransitionEnd instead of setTimeout 700
+
     # images = document.querySelectorAll ".main img"
     # for img in images
     #   img.removeEventListener "webkitTransitionEnd", => this.remove_func(idx)
@@ -333,8 +314,8 @@ class Window
     s.substr s.length-2
 
 
-# main
 
+# main
 
 domready ->
 
@@ -346,6 +327,7 @@ domready ->
   thumbs = document.querySelectorAll ".thumbs img"
   for thumb in thumbs
     thumb.addEventListener "click", gallery.handle_thumbs_click.bind gallery
+
   # resize thumbs
   thumb_width = 80
   width = (thumb_width+5) * gallery.size
@@ -362,7 +344,6 @@ domready ->
   #debug
   # gallery.zoom()
 
-#
 
 # failed attempt in using the low level api
 # img = document.querySelector("img"); evt = new WebKitTransitionEvent("asd"); evt.cancelable = true; evt.currentTarget = img; evt.propertyName = "-webkit-transform"; evt.eventPhase = 2; evt.initEvent("asd"); evt

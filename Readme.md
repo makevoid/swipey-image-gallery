@@ -3,6 +3,27 @@
 
 *live demo: <http://upgal.mkvd.net>*
 
+### Works in webkit browsers and more
+
+- Chrome
+- Safari
+- MobileSafari (iPad)
+- Android browser
+- Firefox (no animations and scale at the moment)
+
+
+### Features
+
+*Browsing:*
+use arrows button on the screen, keyboard arrows, swipe on tablet (future implementation)
+
+
+*Zooming*
+the zoom button is on the top-left corner, press it then swipe (drag) to move the zoomed view
+
+you need to click and drag if you are not using a touch device (tablet)
+
+
 [toadd: showterm + screenshots on how to use it]
 
 
@@ -20,6 +41,7 @@ easily "deployable" online and included into a webview to create an iPad / Andro
 see also other open source projects that use UP Gallery:
 
 - <http://github.com/makevoid/upandcoming>
+
 
 ### Make it yours! Change the images!
 
@@ -46,9 +68,32 @@ and...
 
 you can remove buttons (refresh, arrows, zoom) just removing the html code or a big `display: none` into Sass / CSS will do!
 
+### Change Sass / Coffee and have your assets recompiled
+
+Have it recompiled automatically via guard (guard watches when the source files for changes and automatically generates the css/javascript)
+
+run:
+
+    guard
+
+if you don't have guard (or one of the others guard-plugin) install it/them with all the dependencies issuing:
+
+    bundle install
+
+guard-livereload is an optional dependency, you can remove it from the Gemfile (but it's nice to try and use!)
+
+tip: guard-concat ensures your app will do only one request for all the js as they will be concatenated in one file (all.js)
+
 ### more infos:
 
 The images are named like this so they can be easily sorted automatically by any server
+
+
+### TODO:
+
+- add swipe (when browsing) for tablets
+- add mozTransitions for FireFox
+- add oTransitions for Opera
 
 
 have fun!

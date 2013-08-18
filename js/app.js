@@ -1,76 +1,3 @@
-if (!Function.prototype.bind) {
-  Function.prototype.bind = function(oThis) {
-    var aArgs, fBound, fNOP, fToBind;
-
-    if (typeof this !== "function") {
-      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-    }
-    aArgs = Array.prototype.slice.call(arguments, 1);
-    fToBind = this;
-    fNOP = function() {};
-    fBound = function() {
-      return fToBind.apply((this instanceof fNOP && oThis ? this : oThis), aArgs.concat(Array.prototype.slice.call(arguments)));
-    };
-    fNOP.prototype = this.prototype;
-    fBound.prototype = new fNOP();
-    return fBound;
-  };
-}
-
-// https://github.com/ded/domready
-
-!function (name, definition) {
-  if (typeof module != 'undefined') module.exports = definition()
-  else if (typeof define == 'function' && typeof define.amd == 'object') define(definition)
-  else this[name] = definition()
-}('domready', function (ready) {
-
-  var fns = [], fn, f = false
-    , doc = document
-    , testEl = doc.documentElement
-    , hack = testEl.doScroll
-    , domContentLoaded = 'DOMContentLoaded'
-    , addEventListener = 'addEventListener'
-    , onreadystatechange = 'onreadystatechange'
-    , readyState = 'readyState'
-    , loadedRgx = hack ? /^loaded|^c/ : /^loaded|c/
-    , loaded = loadedRgx.test(doc[readyState])
-
-  function flush(f) {
-    loaded = 1
-    while (f = fns.shift()) f()
-  }
-
-  doc[addEventListener] && doc[addEventListener](domContentLoaded, fn = function () {
-    doc.removeEventListener(domContentLoaded, fn, f)
-    flush()
-  }, f)
-
-
-  hack && doc.attachEvent(onreadystatechange, fn = function () {
-    if (/^c/.test(doc[readyState])) {
-      doc.detachEvent(onreadystatechange, fn)
-      flush()
-    }
-  })
-
-  return (ready = hack ?
-    function (fn) {
-      self != top ?
-        loaded ? fn() : fns.push(fn) :
-        function () {
-          try {
-            testEl.doScroll('left')
-          } catch (e) {
-            return setTimeout(function() { ready(fn) }, 50)
-          }
-          fn()
-        }()
-    } :
-    function (fn) {
-      loaded ? fn() : fns.push(fn)
-    })
-})
 var Gallery, PATH, SIZE, Window, defer, json, llog, removeElement,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -118,10 +45,11 @@ Gallery = (function() {
     this.idx = 0;
     this.images = [];
     this.window = new Window(this);
-    this.fill_window();
   }
 
   Gallery.prototype.fill_window = function() {};
+
+  Gallery.prototype.bind_swipe = function() {};
 
   Gallery.prototype.handle_zmove_start = function(evt) {
     var touch;
@@ -187,8 +115,7 @@ Gallery = (function() {
     this.unbind_movearound();
     this.px = 0;
     this.py = 0;
-    this.remove_all_listeners(img);
-    return document.removeEventListener("mouseup", this.handle_mouseup);
+    return this.remove_all_listeners(img);
   };
 
   Gallery.prototype.handle_zdrag_start = function(evt) {
@@ -229,6 +156,10 @@ Gallery = (function() {
     return img.dispatchEvent(evt);
   };
 
+  Gallery.prototype.unbind_movearound = function() {
+    return document.removeEventListener("mouseup", this.handle_mouseup);
+  };
+
   Gallery.prototype.bind_movearound = function() {
     var img,
       _this = this;
@@ -254,14 +185,6 @@ Gallery = (function() {
     });
     img.addEventListener("zstart", this.handle_zdrag_start.bind(this));
     return img.addEventListener("zend", this.handle_zdrag_end.bind(this));
-  };
-
-  Gallery.prototype.unbind_movearound = function() {};
-
-  Gallery.prototype.movearound = function(evt) {
-    var x, y;
-    x = evt.pageX;
-    return y = evt.pageY;
   };
 
   Gallery.prototype.next = function() {

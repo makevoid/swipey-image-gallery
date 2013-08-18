@@ -21,6 +21,14 @@
   padding: 0 1%;
   background: rgba(230, 230, 230, 0.7); }
 
+.github_link {
+  position: absolute;
+  right: 47%;
+  top: 0;
+  padding: 0 1%;
+  background: rgba(230, 230, 230, 0.7);
+  color: white; }
+
 a {
   text-decoration: none; }
 
