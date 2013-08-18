@@ -107,6 +107,7 @@ class Gallery
     @drag_start = evt
 
   handle_zdrag_end: (evt) ->
+    return unless @drag_start
     dx = evt.x - @drag_start.x
     dy = evt.y - @drag_start.y
     px = dx / innerWidth  * 100

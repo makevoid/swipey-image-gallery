@@ -9,7 +9,6 @@ SIZE = json.size;
 
 llog = function(log) {
   var debug;
-
   debug = document.querySelector(".debug");
   return debug.innerHTML += "" + log + "<br>";
 };
@@ -25,7 +24,6 @@ removeElement = function(elem) {
 ({
   EventFallback: function(event, params) {
     var evt;
-
     params = params || {
       bubbles: false,
       cancelable: false,
@@ -43,7 +41,8 @@ Gallery = (function() {
   Gallery.prototype.size = SIZE;
 
   function Gallery() {
-    this.handle_mouseup = __bind(this.handle_mouseup, this);    this.idx = 0;
+    this.handle_mouseup = __bind(this.handle_mouseup, this);
+    this.idx = 0;
     this.images = [];
     this.window = new Window(this);
     this.fill_window();
@@ -53,14 +52,12 @@ Gallery = (function() {
 
   Gallery.prototype.handle_zmove_start = function(evt) {
     var touch;
-
     touch = evt.touches[0];
     return this.start_zoom_touch = evt;
   };
 
   Gallery.prototype.handle_zmove_end = function(evt) {
     var end, start, x, y;
-
     end = evt.changedTouches[0];
     start = this.start_zoom_touch;
     x = end.pageX - start.pageX;
@@ -84,7 +81,6 @@ Gallery = (function() {
 
   Gallery.prototype.handle_thumbs_click = function(evt) {
     var id;
-
     id = evt.target.dataset.id;
     return this.go_to(parseInt(id));
   };
@@ -106,7 +102,6 @@ Gallery = (function() {
 
   Gallery.prototype.zoom = function() {
     var img;
-
     img = document.querySelector(".main img");
     img.style.webkitTransform = "scale3d(" + this.scale_factor + ")";
     return this.bind_movearound();
@@ -114,7 +109,6 @@ Gallery = (function() {
 
   Gallery.prototype.dezoom = function() {
     var img;
-
     img = document.querySelector(".main img");
     img.style.webkitTransform = "scale3d(1, 1, 1)";
     this.unbind_movearound();
@@ -131,7 +125,9 @@ Gallery = (function() {
   Gallery.prototype.handle_zdrag_end = function(evt) {
     var dx, dy, px, py,
       _this = this;
-
+    if (!this.drag_start) {
+      return;
+    }
     dx = evt.x - this.drag_start.x;
     dy = evt.y - this.drag_start.y;
     px = dx / innerWidth * 100;
@@ -147,7 +143,6 @@ Gallery = (function() {
 
   Gallery.prototype.create_event = function(name, location) {
     var evt;
-
     evt = new Event(name);
     evt.x = location.pageX;
     evt.y = location.pageY;
@@ -156,7 +151,6 @@ Gallery = (function() {
 
   Gallery.prototype.handle_mouseup = function(event) {
     var evt, img;
-
     evt = this.create_event("zend", event);
     img = document.querySelector(".main img");
     return img.dispatchEvent(evt);
@@ -165,11 +159,9 @@ Gallery = (function() {
   Gallery.prototype.bind_movearound = function() {
     var img,
       _this = this;
-
     img = document.querySelector(".main img");
     img.addEventListener("mousedown", function(event) {
       var evt;
-
       evt = _this.create_event("zstart", event);
       return img.dispatchEvent(evt);
     });
@@ -179,13 +171,11 @@ Gallery = (function() {
     });
     img.addEventListener("touchstart", function(event) {
       var evt;
-
       evt = _this.create_event("zstart", event.touches[0]);
       return img.dispatchEvent(evt);
     });
     img.addEventListener("touchend", function(event) {
       var evt;
-
       evt = _this.create_event("zend", event.changedTouches[0]);
       return img.dispatchEvent(evt);
     });
@@ -197,7 +187,6 @@ Gallery = (function() {
 
   Gallery.prototype.movearound = function(evt) {
     var x, y;
-
     x = evt.pageX;
     return y = evt.pageY;
   };
@@ -212,7 +201,6 @@ Gallery = (function() {
 
   Gallery.prototype.go_to = function(idx) {
     var direction;
-
     if (this.idx === idx) {
       return;
     }
@@ -240,7 +228,6 @@ Gallery = (function() {
 
   Gallery.prototype.remove_all_listeners = function(elem) {
     var copy;
-
     copy = elem.cloneNode();
     elem.parentElement.appendChild(copy);
     copy.style.opacity = 1;
@@ -260,7 +247,6 @@ Window = (function() {
 
   Window.prototype.replace_window = function(idx) {
     var images, img, _i, _len;
-
     images = document.querySelectorAll(".main img");
     for (_i = 0, _len = images.length; _i < _len; _i++) {
       img = images[_i];
@@ -281,7 +267,6 @@ Window = (function() {
 
   Window.prototype.push_image = function(idx) {
     var direction, img;
-
     direction = this.direction(idx);
     img = document.createElement("img");
     img.draggable = true;
@@ -300,7 +285,6 @@ Window = (function() {
   Window.prototype.deferred_slide = function(idx, percent) {
     return defer(function() {
       var img;
-
       img = document.querySelector(".main img[data-id='" + idx + "']");
       return img.style.webkitTransform = "translate3d(" + percent + "%, 0, 0)";
     });
@@ -308,7 +292,6 @@ Window = (function() {
 
   Window.prototype.slide = function(direction, idx) {
     var next_id, position;
-
     next_id = direction === "next" ? idx - 1 : idx + 1;
     position = direction === "next" ? -100 : 100;
     this.deferred_slide(next_id, position);
@@ -318,7 +301,6 @@ Window = (function() {
 
   Window.prototype.remove_func = function(idx) {
     var img;
-
     img = document.querySelector(".main img[data-id='" + idx + "']");
     return removeElement(img);
   };
@@ -326,7 +308,6 @@ Window = (function() {
   Window.prototype.remove_image = function(idx) {
     var img,
       _this = this;
-
     img = document.querySelector(".main img");
     return img.addEventListener("webkitTransitionEnd", function() {
       return _this.remove_func(idx);
@@ -340,7 +321,6 @@ Window = (function() {
   Window.prototype.delayed_remove = function(func) {
     var img,
       _this = this;
-
     if (this.webkit_is_supported()) {
       img = document.querySelector(".main img");
       return img.addEventListener("webkitTransitionEnd", function() {
@@ -367,7 +347,6 @@ Window = (function() {
 
   Window.prototype.pad = function(num) {
     var s;
-
     s = "0" + num;
     return s.substr(s.length - 2);
   };
@@ -378,7 +357,6 @@ Window = (function() {
 
 domready(function() {
   var gallery, next, prev, thumb, thumb_width, thumbs, thumbs_cont, width, zoom, _i, _len;
-
   gallery = new Gallery();
   window.gallery = gallery;
   window.addEventListener("keydown", gallery.handle_keyboard.bind(gallery));
