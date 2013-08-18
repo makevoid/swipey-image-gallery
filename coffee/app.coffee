@@ -331,7 +331,7 @@ domready ->
     thumb.addEventListener "click", gallery.handle_thumbs_click.bind gallery
   # resize thumbs
   thumb_width = 80
-  width = (thumb_width+4) * gallery.size
+  width = (thumb_width+5) * gallery.size
   thumbs_cont = document.querySelector ".thumbs"
   thumbs_cont.style.width = "#{width}px"
 
