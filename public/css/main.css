@@ -8,16 +8,17 @@
   position: absolute;
   right: 0;
   top: 0;
-  padding: 1%;
-  background: rgba(230, 230, 230, 0.7); }
+  padding: 0.7%;
+  background: rgba(230, 230, 230, 0.7);
+  font-size: 1.4em; }
   .refresh a {
-    color: black; }
+    color: white; }
 
 .debug {
   position: absolute;
   right: 0;
-  top: 25px;
-  padding: 1%;
+  top: 40px;
+  padding: 0 1%;
   background: rgba(230, 230, 230, 0.7); }
 
 a {

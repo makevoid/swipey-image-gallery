@@ -242,7 +242,7 @@ Gallery = (function() {
     var copy;
 
     copy = elem.cloneNode();
-    elem.parentElement.insertBefore(copy);
+    elem.parentElement.appendChild(copy);
     copy.style.opacity = 1;
     return removeElement(elem);
   };
@@ -287,13 +287,11 @@ Window = (function() {
     img.draggable = true;
     img.dataset.id = idx;
     img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
+    this.gallery_elem().appendChild(img);
+    img.style.opacity = 1;
     if (direction === "next") {
-      this.gallery_elem().appendChild(img);
-      img.style.opacity = 1;
       img.style.webkitTransform = "translate3d(100%, 0, 0)";
     } else {
-      this.gallery_elem().insertBefore(img);
-      img.style.opacity = 1;
       img.style.webkitTransform = "translate3d(-100%, 0, 0)";
     }
     return this.slide(direction, idx);
