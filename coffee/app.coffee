@@ -1,4 +1,4 @@
-# TODO: 
+# TODO:
 #
 # - detect double click to zoom and de-zoom
 
@@ -23,6 +23,14 @@ removeElement = (elem) ->
   # use .remove() when possible, will delete when Safari/MobileSafari will update the syntax?
   elem.parentNode.removeChild elem
 
+
+EventFallback: (event, params) ->
+  params = params || { bubbles: false, cancelable: false, detail: undefined };
+  evt = document.createEvent 'EventFallback'
+  evt.initCustomEven  event, params.bubbles, params.cancelable, params.detail
+  evt
+
+
 class Gallery
   zoomed: false
   size: SIZE
@@ -44,7 +52,7 @@ class Gallery
   handle_zmove_start: (evt) ->
     touch = evt.touches[0]
     @start_zoom_touch = evt
-    
+
   handle_zmove_end: (evt) ->
     # console.log @start_zoom_touch
     end = evt.changedTouches[0]
@@ -53,7 +61,7 @@ class Gallery
     x = end.pageX - start.pageX
     y = end.pageY - start.pageY
     console.log "zoom end", x, y
-    
+
 
   handle_swipe: ->
     llog "swipe"
@@ -92,11 +100,11 @@ class Gallery
     @px = 0
     @py = 0
     this.remove_all_listeners img
-    
+
   handle_zdrag_start: (evt) ->
     # @drag_start = { x: evt.pageX, y: evt.pageY }
     @drag_start = evt
-    
+
   handle_zdrag_end: (evt) ->
     dx = evt.x - @drag_start.x
     dy = evt.y - @drag_start.y
@@ -109,21 +117,21 @@ class Gallery
     defer =>
       evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
     # console.log "moved", @px, @py
-  
+
   create_event: (name, location) ->
     evt = new Event name
     evt.x = location.pageX
     evt.y = location.pageY
     evt
-    
+
   bind_movearound: ->
     img = document.querySelector ".main img"
     # img.addEventListener "drag", this.movearound
-    
+
     # img.addEventListener "dragstart",  this.handle_zdrag_start.bind this
     #   # evt.preventDefault() ?
     # img.addEventListener "dragend",  this.handle_zdrag_end.bind this
-    
+
     img.addEventListener "dragstart", (event) =>
       evt = this.create_event "zstart", event
       img.dispatchEvent evt
@@ -132,18 +140,18 @@ class Gallery
     img.addEventListener "touchstart", (event) =>
       evt = this.create_event "zstart", event.touches[0]
       img.dispatchEvent evt
-      
+
     img.addEventListener "dragend", (event) =>
       evt = this.create_event "zend", event
       img.dispatchEvent evt
-    
+
     img.addEventListener "touchend", (event) =>
       evt = this.create_event "zend", event.changedTouches[0]
       img.dispatchEvent evt
 
-      
-    img.addEventListener "zstart", this.handle_zdrag_start.bind this  
-    
+
+    img.addEventListener "zstart", this.handle_zdrag_start.bind this
+
     img.addEventListener "zend", this.handle_zdrag_end.bind this
     # img.r
 
