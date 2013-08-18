@@ -132,17 +132,31 @@ class Gallery
     #   # evt.preventDefault() ?
     # img.addEventListener "dragend",  this.handle_zdrag_end.bind this
 
-    img.addEventListener "dragstart", (event) =>
+    # TODO: use mousedown e mousemove
+    img.addEventListener "mousedown", (event) =>
       evt = this.create_event "zstart", event
       img.dispatchEvent evt
-      # evt.preventDefault() ?
+
+    document.addEventListener "mouseup", (event) =>
+      evt = this.create_event "zend", event
+      img.dispatchEvent evt
+
+    img.addEventListener "dragstart", (event) =>
+      event.preventDefault()
+
+    # drag(ndrop) API is bugged, sorry
+
+    # img.addEventListener "dragstart", (event) =>
+    #   evt = this.create_event "zstart", event
+    #   img.dispatchEvent evt
+    #   # event.preventDefault() # ? # this removes the drag browser effect
+
+    # img.addEventListener "dragend", (event) =>
+    #   evt = this.create_event "zend", event
+    #   img.dispatchEvent evt
 
     img.addEventListener "touchstart", (event) =>
       evt = this.create_event "zstart", event.touches[0]
-      img.dispatchEvent evt
-
-    img.addEventListener "dragend", (event) =>
-      evt = this.create_event "zend", event
       img.dispatchEvent evt
 
     img.addEventListener "touchend", (event) =>

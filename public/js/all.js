@@ -230,22 +230,25 @@ Gallery = (function() {
       _this = this;
 
     img = document.querySelector(".main img");
-    img.addEventListener("dragstart", function(event) {
+    img.addEventListener("mousedown", function(event) {
       var evt;
 
       evt = _this.create_event("zstart", event);
       return img.dispatchEvent(evt);
     });
+    document.addEventListener("mouseup", function(event) {
+      var evt;
+
+      evt = _this.create_event("zend", event);
+      return img.dispatchEvent(evt);
+    });
+    img.addEventListener("dragstart", function(event) {
+      return event.preventDefault();
+    });
     img.addEventListener("touchstart", function(event) {
       var evt;
 
       evt = _this.create_event("zstart", event.touches[0]);
-      return img.dispatchEvent(evt);
-    });
-    img.addEventListener("dragend", function(event) {
-      var evt;
-
-      evt = _this.create_event("zend", event);
       return img.dispatchEvent(evt);
     });
     img.addEventListener("touchend", function(event) {
