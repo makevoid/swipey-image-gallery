@@ -1,6 +1,8 @@
 # UP Gallery (UPGal for friends...)
 ### create tablet reading/image viewing webapp in minutes!
 
+*live demo: <http://upgal.mkvd.net>*
+
 [toadd: showterm + screenshots on how to use it]
 
 
