@@ -222,7 +222,7 @@ class Gallery
 
   remove_all_listeners: (elem) ->
     copy = elem.cloneNode()
-    elem.parentElement.insertBefore copy
+    elem.parentElement.appendChild copy
     # roperty_name duration timing_function delay;
     copy.style.opacity = 1
     removeElement elem
@@ -262,15 +262,13 @@ class Window
     img.draggable = true
     img.dataset.id = idx
     img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
+    this.gallery_elem().appendChild img
+    img.style.opacity = 1
 
     if direction == "next"
-      this.gallery_elem().appendChild img
-      img.style.opacity = 1
       # place on the right
       img.style.webkitTransform = "translate3d(100%, 0, 0)"
     else
-      this.gallery_elem().insertBefore img
-      img.style.opacity = 1
       # place on the left
       img.style.webkitTransform = "translate3d(-100%, 0, 0)"
 
