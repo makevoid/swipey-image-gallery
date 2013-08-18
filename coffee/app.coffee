@@ -100,6 +100,7 @@ class Gallery
     @px = 0
     @py = 0
     this.remove_all_listeners img
+    document.removeEventListener "mouseup", this.handle_mouseup
 
   handle_zdrag_start: (evt) ->
     # @drag_start = { x: evt.pageX, y: evt.pageY }
@@ -124,6 +125,11 @@ class Gallery
     evt.y = location.pageY
     evt
 
+  handle_mouseup: (event) =>
+    evt = this.create_event "zend", event
+    img = document.querySelector ".main img"
+    img.dispatchEvent evt
+
   bind_movearound: ->
     img = document.querySelector ".main img"
     # img.addEventListener "drag", this.movearound
@@ -137,9 +143,7 @@ class Gallery
       evt = this.create_event "zstart", event
       img.dispatchEvent evt
 
-    document.addEventListener "mouseup", (event) =>
-      evt = this.create_event "zend", event
-      img.dispatchEvent evt
+    document.addEventListener "mouseup", this.handle_mouseup
 
     img.addEventListener "dragstart", (event) =>
       event.preventDefault()

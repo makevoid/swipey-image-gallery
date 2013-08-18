@@ -71,7 +71,8 @@ if (!Function.prototype.bind) {
       loaded ? fn() : fns.push(fn)
     })
 })
-var Gallery, PATH, SIZE, Window, defer, json, llog, removeElement;
+var Gallery, PATH, SIZE, Window, defer, json, llog, removeElement,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 json = JSON.parse(ISSUES_JSON);
 
@@ -115,7 +116,7 @@ Gallery = (function() {
   Gallery.prototype.size = SIZE;
 
   function Gallery() {
-    this.idx = 0;
+    this.handle_mouseup = __bind(this.handle_mouseup, this);    this.idx = 0;
     this.images = [];
     this.window = new Window(this);
     this.fill_window();
@@ -192,7 +193,8 @@ Gallery = (function() {
     this.unbind_movearound();
     this.px = 0;
     this.py = 0;
-    return this.remove_all_listeners(img);
+    this.remove_all_listeners(img);
+    return document.removeEventListener("mouseup", this.handle_mouseup);
   };
 
   Gallery.prototype.handle_zdrag_start = function(evt) {
@@ -225,6 +227,14 @@ Gallery = (function() {
     return evt;
   };
 
+  Gallery.prototype.handle_mouseup = function(event) {
+    var evt, img;
+
+    evt = this.create_event("zend", event);
+    img = document.querySelector(".main img");
+    return img.dispatchEvent(evt);
+  };
+
   Gallery.prototype.bind_movearound = function() {
     var img,
       _this = this;
@@ -236,12 +246,7 @@ Gallery = (function() {
       evt = _this.create_event("zstart", event);
       return img.dispatchEvent(evt);
     });
-    document.addEventListener("mouseup", function(event) {
-      var evt;
-
-      evt = _this.create_event("zend", event);
-      return img.dispatchEvent(evt);
-    });
+    document.addEventListener("mouseup", this.handle_mouseup);
     img.addEventListener("dragstart", function(event) {
       return event.preventDefault();
     });
