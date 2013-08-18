@@ -1,4 +1,4 @@
-# UP Gallery
+# UP Gallery (UPGal for friends...)
 ### create tablet reading/image viewing webapp in minutes!
 
 [toadd: showterm + screenshots on how to use it]
