@@ -30,7 +30,6 @@ you need to click and drag if you are not using a touch device (tablet)
 to run it:
 
 - clone/download the repo
-- cd into public
 - run: `python -m SimpleHTTPServer 3000` (or use a server like apache/nginx etc)
 - visit <http://localhost:3000>
 
@@ -42,6 +41,8 @@ see also other open source projects that use UP Gallery:
 
 - <http://github.com/makevoid/upandcoming>
 
+
+note: when you package the app for a device (for example with phonegap or just using a WebView) the image loading time will be few milliseconds, so there will be no flickering when switching to a not already loaded image
 
 ### Make it yours! Change the images!
 
@@ -57,7 +58,7 @@ that's it!
 
 for example: extract it in your own existing app!
 
-1) go to public/index.html
+1) go to index.html
 
 2) search and replace "images" with your dir where are you going to put images
 
