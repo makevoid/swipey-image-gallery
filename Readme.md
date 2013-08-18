@@ -1,26 +1,23 @@
-# upandcoming
+# UP Gallery
+### create tablet reading/image viewing webapp in minutes!
 
-----
-
-todo:
-
-- image previews
-- load images via ajax
+[toadd: showterm + screenshots on how to use it]
 
 
+to run it:
+
+- clone/download the repo
+- cd into public
+- run: `python -m SimpleHTTPServer 3000`
+- visit <http://localhost:3000>
 
 
-- zoom?
+easily "deployable" online and included into a webview to create an iPad / Android reading or photo-viewing app!
 
 
+see also other open source projects that use UP Gallery:
+
+- <http://github.com/makevoid/upandcoming>
 
 
-
-
-
-----
-notes:
-
-link dropbox dir:
-
-    ln -s ~/Dropbox/upandcoming/issues/ public/issues
+have fun!
