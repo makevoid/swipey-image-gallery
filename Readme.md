@@ -3,6 +3,7 @@
 
 *live demo: <http://upgal.mkvd.net>*
 
+
 ### Works in webkit browsers and more
 
 - Chrome
@@ -22,6 +23,13 @@ use arrows button on the screen, keyboard arrows, swipe on tablet (future implem
 the zoom button is on the top-left corner, press it then swipe (drag) to move the zoomed view
 
 you need to click and drag if you are not using a touch device (tablet)
+
+
+---
+
+uses CSS3 Transitions (webkitTransition) to animate the sliding / zooming
+
+*no third party libraries used*, it's lighter, cleaner and more flexible! plain JS, yay!
 
 
 [toadd: showterm + screenshots on how to use it]
