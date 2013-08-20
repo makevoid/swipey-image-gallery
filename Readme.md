@@ -10,7 +10,7 @@
 - Safari
 - MobileSafari (iPad)
 - Android browser
-- Firefox (no animations and scale at the moment)
+- Firefox (no animations and scale at the moment, but it's an easy patch to add moz prefixed transitions)
 
 
 ### Features
@@ -103,6 +103,7 @@ The images are named like this so they can be easily sorted automatically by any
 - add swipe (when browsing) for tablets
 - add mozTransitions for FireFox
 - add oTransitions for Opera
+- keep the images centered like in <http://shampy.it/foto_tagli/donna> - <https://github.com/makevoid/shampy> (needs fixing, test in browser)
 
 
 have fun!
