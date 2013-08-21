@@ -3,6 +3,20 @@ json = JSON.parse(ISSUES_JSON)
 PATH = json.path
 SIZE = json.size
 
+# `
+# (function () {
+#   function CustomEvent ( event, params ) {
+#     params = params || { bubbles: false, cancelable: false, detail: undefined };
+#     var evt = document.createEvent( 'CustomEvent' );
+#     evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+#     return evt;
+#    };
+
+#   CustomEvent.prototype = window.CustomEvent.prototype;
+
+#   window.CustomEvent = CustomEvent;
+# })();
+# `
 
 # utils
 
@@ -18,11 +32,25 @@ removeElement = (elem) ->
   elem.parentNode.removeChild elem
 
 
-EventFallback: (event, params) ->
-  params = params || { bubbles: false, cancelable: false, detail: undefined };
-  evt = document.createEvent 'EventFallback'
-  evt.initCustomEven  event, params.bubbles, params.cancelable, params.detail
-  evt
+# EventFallback = (event, params) ->
+#   params = params || { bubbles: false, cancelable: false, detail: undefined };
+#   evt = document.createEvent 'EventFallback'
+#   evt.initCustomEvent  event, params.bubbles, params.cancelable, params.detail
+#   evt
+
+
+  # var event = document.createEvent('Event');
+
+  # // Define that the event name is 'build'.
+  # event.initEvent('build', true, true);
+
+  # // target can be any Element or other EventTarget.
+  # target.dispatchEvent(event);
+
+  # // Listen for the event.
+  # target.addEventListener('build', function (e) {
+  #   // e.target matches target from above
+  # }, false);
 
 
 class Gallery
@@ -117,7 +145,8 @@ class Gallery
 
 
   create_event: (name, location) ->
-    evt = new Event name
+    evt = new CustomEvent name
+    #evt = new Event name # TODO: switch to the real implementation when available
     evt.x = location.pageX
     evt.y = location.pageY
     evt

@@ -94,20 +94,6 @@ removeElement = function(elem) {
   return elem.parentNode.removeChild(elem);
 };
 
-({
-  EventFallback: function(event, params) {
-    var evt;
-    params = params || {
-      bubbles: false,
-      cancelable: false,
-      detail: void 0
-    };
-    evt = document.createEvent('EventFallback');
-    evt.initCustomEven(event, params.bubbles, params.cancelable, params.detail);
-    return evt;
-  }
-});
-
 Gallery = (function() {
   Gallery.prototype.zoomed = false;
 
@@ -216,7 +202,7 @@ Gallery = (function() {
 
   Gallery.prototype.create_event = function(name, location) {
     var evt;
-    evt = new Event(name);
+    evt = new CustomEvent(name);
     evt.x = location.pageX;
     evt.y = location.pageY;
     return evt;
