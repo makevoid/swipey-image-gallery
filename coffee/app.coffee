@@ -3,21 +3,6 @@ json = JSON.parse(ISSUES_JSON)
 PATH = json.path
 SIZE = json.size
 
-# `
-# (function () {
-#   function CustomEvent ( event, params ) {
-#     params = params || { bubbles: false, cancelable: false, detail: undefined };
-#     var evt = document.createEvent( 'CustomEvent' );
-#     evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-#     return evt;
-#    };
-
-#   CustomEvent.prototype = window.CustomEvent.prototype;
-
-#   window.CustomEvent = CustomEvent;
-# })();
-# `
-
 # utils
 
 llog = (log) ->
@@ -30,27 +15,6 @@ defer = (fn) ->
 removeElement = (elem) ->
   # use .remove() when possible, will delete when Safari/MobileSafari will update the syntax?
   elem.parentNode.removeChild elem
-
-
-# EventFallback = (event, params) ->
-#   params = params || { bubbles: false, cancelable: false, detail: undefined };
-#   evt = document.createEvent 'EventFallback'
-#   evt.initCustomEvent  event, params.bubbles, params.cancelable, params.detail
-#   evt
-
-
-  # var event = document.createEvent('Event');
-
-  # // Define that the event name is 'build'.
-  # event.initEvent('build', true, true);
-
-  # // target can be any Element or other EventTarget.
-  # target.dispatchEvent(event);
-
-  # // Listen for the event.
-  # target.addEventListener('build', function (e) {
-  #   // e.target matches target from above
-  # }, false);
 
 
 class Gallery
@@ -89,7 +53,6 @@ class Gallery
 
 
   handle_swipe: ->
-    llog "swipe"
     this.next()
 
   handle_keyboard: (evt) ->
@@ -128,12 +91,12 @@ class Gallery
     this.remove_all_listeners img
 
   handle_zdrag_start: (evt) ->
-    @drag_start = evt
+    @drag_start = { x: evt.pageX, y: evt.pageY }
 
   handle_zdrag_end: (evt) ->
     return unless @drag_start
-    dx = evt.x - @drag_start.x
-    dy = evt.y - @drag_start.y
+    dx = evt.pageX - @drag_start.x
+    dy = evt.pageY - @drag_start.y
     px = dx / innerWidth  * 100
     py = dy / innerHeight * 100
     @px = px + @px
@@ -144,17 +107,8 @@ class Gallery
       evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
 
 
-  create_event: (name, location) ->
-    evt = new CustomEvent name
-    #evt = new Event name # TODO: switch to the real implementation when available
-    evt.x = location.pageX
-    evt.y = location.pageY
-    evt
-
-  handle_mouseup: (event) =>
-    evt = this.create_event "zend", event
-    img = document.querySelector ".main img"
-    img.dispatchEvent evt
+  handle_mouseup: (event) => # same as down
+    this.handle_zdrag_end event
 
   unbind_movearound: ->
     document.removeEventListener "mouseup", this.handle_mouseup
@@ -162,40 +116,18 @@ class Gallery
   bind_movearound: ->
     img = document.querySelector ".main img"
 
-    # using old api
-
-    img.addEventListener "mousedown", (event) =>
-      evt = this.create_event "zstart", event
-      img.dispatchEvent evt
+    img.addEventListener "mousedown", this.handle_zdrag_start.bind this
 
     document.addEventListener "mouseup", this.handle_mouseup
 
     img.addEventListener "dragstart", (event) =>
       event.preventDefault()
 
-    # drag(ndrop) API is bugged, sorry
-
-    # img.addEventListener "dragstart", (event) =>
-    #   evt = this.create_event "zstart", event
-    #   img.dispatchEvent evt
-    #   # event.preventDefault() # ? # this removes the drag browser effect
-
-    # img.addEventListener "dragend", (event) =>
-    #   evt = this.create_event "zend", event
-    #   img.dispatchEvent evt
-
     img.addEventListener "touchstart", (event) =>
-      evt = this.create_event "zstart", event.touches[0]
-      img.dispatchEvent evt
+      this.handle_zdrag_start event.touches[0]
 
     img.addEventListener "touchend", (event) =>
-      evt = this.create_event "zend", event.changedTouches[0]
-      img.dispatchEvent evt
-
-
-    img.addEventListener "zstart", this.handle_zdrag_start.bind this
-
-    img.addEventListener "zend", this.handle_zdrag_end.bind this
+      this.handle_zdrag_end event.changedTouches[0]
 
 
   # move

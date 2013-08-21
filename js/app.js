@@ -53,7 +53,6 @@ Gallery = (function() {
   };
 
   Gallery.prototype.handle_swipe = function() {
-    llog("swipe");
     return this.next();
   };
 
@@ -105,7 +104,10 @@ Gallery = (function() {
   };
 
   Gallery.prototype.handle_zdrag_start = function(evt) {
-    return this.drag_start = evt;
+    return this.drag_start = {
+      x: evt.pageX,
+      y: evt.pageY
+    };
   };
 
   Gallery.prototype.handle_zdrag_end = function(evt) {
@@ -114,8 +116,8 @@ Gallery = (function() {
     if (!this.drag_start) {
       return;
     }
-    dx = evt.x - this.drag_start.x;
-    dy = evt.y - this.drag_start.y;
+    dx = evt.pageX - this.drag_start.x;
+    dy = evt.pageY - this.drag_start.y;
     px = dx / innerWidth * 100;
     py = dy / innerHeight * 100;
     this.px = px + this.px;
@@ -127,19 +129,8 @@ Gallery = (function() {
     });
   };
 
-  Gallery.prototype.create_event = function(name, location) {
-    var evt;
-    evt = new CustomEvent(name);
-    evt.x = location.pageX;
-    evt.y = location.pageY;
-    return evt;
-  };
-
   Gallery.prototype.handle_mouseup = function(event) {
-    var evt, img;
-    evt = this.create_event("zend", event);
-    img = document.querySelector(".main img");
-    return img.dispatchEvent(evt);
+    return this.handle_zdrag_end(event);
   };
 
   Gallery.prototype.unbind_movearound = function() {
@@ -150,27 +141,17 @@ Gallery = (function() {
     var img,
       _this = this;
     img = document.querySelector(".main img");
-    img.addEventListener("mousedown", function(event) {
-      var evt;
-      evt = _this.create_event("zstart", event);
-      return img.dispatchEvent(evt);
-    });
+    img.addEventListener("mousedown", this.handle_zdrag_start.bind(this));
     document.addEventListener("mouseup", this.handle_mouseup);
     img.addEventListener("dragstart", function(event) {
       return event.preventDefault();
     });
     img.addEventListener("touchstart", function(event) {
-      var evt;
-      evt = _this.create_event("zstart", event.touches[0]);
-      return img.dispatchEvent(evt);
+      return _this.handle_zdrag_start(event.touches[0]);
     });
-    img.addEventListener("touchend", function(event) {
-      var evt;
-      evt = _this.create_event("zend", event.changedTouches[0]);
-      return img.dispatchEvent(evt);
+    return img.addEventListener("touchend", function(event) {
+      return _this.handle_zdrag_end(event.changedTouches[0]);
     });
-    img.addEventListener("zstart", this.handle_zdrag_start.bind(this));
-    return img.addEventListener("zend", this.handle_zdrag_end.bind(this));
   };
 
   Gallery.prototype.next = function() {
