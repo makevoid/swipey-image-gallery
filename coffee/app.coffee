@@ -142,6 +142,9 @@ class Gallery
     return if @idx == idx
     return if idx < 0
     return if idx > @size
+    if @zoomed
+      img = document.querySelector ".main img"
+      this.remove_all_listeners img
     @zoomed = false
     @px = 0
     @py = 0

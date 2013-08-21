@@ -163,7 +163,7 @@ Gallery = (function() {
   };
 
   Gallery.prototype.go_to = function(idx) {
-    var direction;
+    var direction, img;
     if (this.idx === idx) {
       return;
     }
@@ -172,6 +172,10 @@ Gallery = (function() {
     }
     if (idx > this.size) {
       return;
+    }
+    if (this.zoomed) {
+      img = document.querySelector(".main img");
+      this.remove_all_listeners(img);
     }
     this.zoomed = false;
     this.px = 0;
