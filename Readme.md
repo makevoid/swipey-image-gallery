@@ -1,7 +1,14 @@
-# UP Gallery (UPGal for friends...)
-### create tablet reading/image viewing webapp in minutes!
+### up-gallery
 
-*live demo: <http://upgal.mkvd.net>* (inactive)
+Coffeescript web based swipey swipey image gallery I built in 2013!
+
+supports both touch based and keyboard based (desktop) "mode of operation"
+
+
+
+---
+
+Original readme: (:D)
 
 
 ### Works in webkit browsers and more
@@ -103,7 +110,6 @@ The images are named like this so they can be easily sorted automatically by any
 - add swipe (when browsing) for tablets
 - add mozTransitions for FireFox
 - add oTransitions for Opera
-- keep the images centered like in <http://shampy.it/foto_tagli/donna> - <https://github.com/makevoid/shampy> (needs fixing, test in browser)
-
+- keep the images centered vertically
 
 have fun!
